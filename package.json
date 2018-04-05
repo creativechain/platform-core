@@ -29,8 +29,12 @@
     "better-sqlite3": "^4.1.0",
     "bitcoinjs-lib": "^3.3.2",
     "coinselect": "git://github.com/creativechain/coinselect.git",
+    "file-size": "^1.0.0",
     "ipfs": "creativechain/js-ipfs",
     "lzma": "^2.3.2",
-    "trantor-js": "^0.3.1"
+    "path": "^0.12.7",
+    "sha256": "^0.2.0",
+    "trantor-js": "^0.3.1",
+    "upath": "^1.0.4"
   }
 }
