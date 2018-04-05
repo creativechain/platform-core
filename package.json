@@ -1,0 +1,36 @@
+{
+  "name": "platform-core",
+  "version": "0.0.0",
+  "description": "Creativechain Platform Core",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/creativechain/platform-core.git"
+  },
+  "keywords": [
+    "creativechain",
+    "creativecoin",
+    "trantor",
+    "platform",
+    "universe",
+    "core"
+  ],
+  "author": "Creativechain Developers",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/creativechain/platform-core/issues"
+  },
+  "homepage": "https://github.com/creativechain/platform-core#readme",
+  "dependencies": {
+    "altcoin-rpc": "^1.0.2",
+    "better-sqlite3": "^4.1.0",
+    "bitcoinjs-lib": "^3.3.2",
+    "coinselect": "git://github.com/creativechain/coinselect.git",
+    "ipfs": "creativechain/js-ipfs",
+    "lzma": "^2.3.2",
+    "trantor-js": "^0.3.1"
+  }
+}
