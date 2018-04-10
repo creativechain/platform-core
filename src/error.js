@@ -4,5 +4,7 @@ let ERROR = {
 };
 
 if (module) {
-    module.exports = ERROR;
+    module.exports = {
+        ERROR
+    };
 }

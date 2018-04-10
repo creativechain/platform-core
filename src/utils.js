@@ -471,6 +471,18 @@ class Utils {
 
         return keys;
     }
+
+    /**
+     *
+     * @param newObj
+     * @param defaultObj
+     * @return {{}}
+     */
+    static combine(newObj, defaultObj) {
+        let finalObj = {};
+        Object.assign(finalObj, defaultObj, newObj);
+        return finalObj;
+    }
 }
 
 if (module) {

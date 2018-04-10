@@ -25,16 +25,17 @@
   },
   "homepage": "https://github.com/creativechain/platform-core#readme",
   "dependencies": {
+    "EventEmitter": "^1.0.0",
     "altcoin-rpc": "^1.0.2",
     "better-sqlite3": "^4.1.0",
     "bitcoinjs-lib": "^3.3.2",
     "coinselect": "git://github.com/creativechain/coinselect.git",
     "file-size": "^1.0.0",
-    "ipfs": "creativechain/js-ipfs",
+    "ipfs": "github:creativechain/js-ipfs",
     "lzma": "^2.3.2",
     "path": "^0.12.7",
     "sha256": "^0.2.0",
-    "trantor-js": "^0.3.1",
+    "trantor-js": "^0.3.3",
     "upath": "^1.0.4"
   }
 }
