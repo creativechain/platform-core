@@ -160,16 +160,14 @@ class File {
 
     /**
      *
-     * @param {string} path
+     * @param {string} file
      * @param content
      * @param {string} format
      */
-    static write(path, content, format = 'utf8') {
+    static write(file, content, format = 'utf8') {
         //console.log('Writing', path);
-        File.mkpath(path, true);
-        let fd = fs.openSync(path, 'w+');
-        fs.writeFileSync(fd, content, format);
-        fs.closeSync(fd);
+        File.mkpath(file, true);
+        fs.writeFileSync(file, content, format);
     }
 
     /**
@@ -189,7 +187,7 @@ class File {
      */
     static cp(source, dest) {
         console.log('Copying', source, dest);
-        fs.createReadStream(source).pipe(fs.createWriteStream(dest));
+        fs.copyFileSync(source, dest);
     }
 
     /**

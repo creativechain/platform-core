@@ -186,7 +186,7 @@ IndexDB.prototype.getAuthor = function(address, userAddress, callback) {
  */
 IndexDB.prototype.insertTorrent = function(ipfsCid, file, callback) {
     let insertTorrent = this.database.prepare('REPLACE INTO Torrent VALUES (?, ?, ?)');
-    insertTorrent.run(ipfsCid.infoHash, ipfsCid.magnetURI, file);
+    insertTorrent.run(ipfsCid.infoHash, ipfsCid.CID, file);
     if (callback) {
         callback();
     }
@@ -830,15 +830,15 @@ IndexDB.prototype.getAllPaymentRequest = function(callback) {
 /**
  *
  * @param {string} hash
- * @param {string} magnetURI
+ * @param {string} CID
  * @param {string} path
  * @param {string} file
  * @param callback
  */
-IndexDB.prototype.putTorrent = function(hash, magnetURI, path, file, callback) {
-    //console.log('Inserting torrent on db', hash, magnetURI, path, file);
+IndexDB.prototype.putTorrent = function(hash, CID, path, file, callback) {
+    //console.log('Inserting torrent on db', hash, CID, path, file);
     let insertTorrent = this.database.prepare('REPLACE INTO Torrent VALUES (?, ?, ?, ?)');
-    insertTorrent.run(hash, magnetURI, path, file);
+    insertTorrent.run(hash, CID, path, file);
     if (callback) {
         callback();
     }
