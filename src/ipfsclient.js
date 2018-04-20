@@ -129,7 +129,7 @@ class IpfsClient extends IPFS {
             let hash = magnet.split('/')[0];
             let name = magnet.split('/')[1];
 
-            this.node.files.get(hash, function (err, files) {
+            this.files.get(hash, function (err, files) {
                 if (err) {
                     console.error(err);
                 } else {
@@ -159,6 +159,7 @@ class IpfsClient extends IPFS {
                         data.path = desPath;
                         data.destFile = file;
                         callback(data, file, contentAddress);
+                        that.emit('download', data, file, contentAddress);
                     }
                 }
             })
@@ -166,8 +167,10 @@ class IpfsClient extends IPFS {
     }
 
     close() {
+        let that = this;
         this.node.stop(function () {
-            console.log('IPFS node stopped!')
+            console.log('IPFS node stopped!');
+            that.emit('stopped');
         });
     }
 }
