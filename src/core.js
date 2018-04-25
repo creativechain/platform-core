@@ -5,7 +5,7 @@ let RPCWallet = require('./rpcwallet');
 let Error = require('./error');
 let {OS, File, Utils} = require('./utils');
 let {DecodedTransaction, Spendable, TransactionBuilder} = require('./txwrapper');
-let {Constants, Content, TrantorUtils, ContentData, Author, Like, Follow, Unfollow, MediaData, Comment, Payment,
+let {Constants, TrantorUtils, ContentData, Author, Like, Follow, Unfollow, MediaData, Comment, Payment,
     BlockContent} = require('trantor-js');
 let creativecoin = require('bitcoinjs-lib');
 
@@ -46,7 +46,7 @@ class Core extends EventEmitter {
         let onFinish = function () {
             console.log('checkBinaryExists - onFinish');
             File.chmod(this.constants.BIN_DIR + binaryName, "0744"); //Set permissions rwx r-- ---
-            that.emit('core.daemondownloading', 100);
+            that.emit('core.daemon.downloading', 100);
             callback(true);
         };
 
@@ -80,7 +80,7 @@ class Core extends EventEmitter {
             let downloadDaemon = function () {
                 File.download(this.constants.DAEMON_URL + binPlatform, binaryFile, function (progress) {
                     console.log('Downloading daemon', progress + '%');
-                    that.emit('core.daemondownloading', progress);
+                    that.emit('core.daemon.downloading', progress);
                 }, function () {
                     setTimeout(function () {
                         onFinish();
@@ -148,7 +148,7 @@ class Core extends EventEmitter {
         File.mkpath(this.constants.DATABASE_FILE, true);
         this.dbrunner.start(this.constants.DATABASE_FILE, this.constants.DATABASE_CREATION_FILE);
 
-        this.dbrunner.send('migrate', [this.constants.DBMIGRATIONS_DIR], function () {
+        this.dbrunner.send('migrate', this.constants.DBMIGRATIONS_DIR, function () {
             console.log('Database initialized');
             callCallback();
         });
@@ -156,7 +156,7 @@ class Core extends EventEmitter {
         this.ipfsrunner.start(this.config.ipfsConfig);
 
         let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
-        this.ipfsrunner.send('connect', [swarm], function (err) {
+        this.ipfsrunner.send('connect', swarm, function (err) {
             if (err) {
                 console.error(err);
             } else {
@@ -171,7 +171,7 @@ class Core extends EventEmitter {
      * @param callback
      */
     start(callback) {
-        this.emit('core.beforestart');
+        this.emit('core.start');
         if (!this.isInitializing) {
             this.isInitializing = true;
             this.emit('core.loading');
@@ -182,7 +182,7 @@ class Core extends EventEmitter {
                     that.__initClients(function () {
                         that.isInitializing = false;
                         console.log('emiting onstart');
-                        that.emit('core.afterstart');
+                        that.emit('core.started');
                         if (callback) {
                             callback();
                         }
@@ -240,7 +240,7 @@ class Core extends EventEmitter {
                         }
 
                         that.isExploring = false;
-                        that.dbrunner.send('updateLastExploredBlock', [blockHeight], function (err, result) {
+                        that.dbrunner.send('updateLastExploredBlock', blockHeight, function (err, result) {
                             //console.log(err, result);
                         });
                         that.emit('core.explore.finish', blockCount, blockHeight);
@@ -261,7 +261,7 @@ class Core extends EventEmitter {
                         if (count === txIds.length && !readingIndex) {
                             broadcastProgress(blockHeight);
 
-                            that.dbrunner.send('updateLastExploredBlock', [blockHeight], function (err, result) {
+                            that.dbrunner.send('updateLastExploredBlock', blockHeight, function (err, result) {
                                 //console.log(err, result);
                             });
 
@@ -293,7 +293,7 @@ class Core extends EventEmitter {
 
                                     try {
                                         let data = tx.getData();
-                                        if (data.type === Constants.TYPE.INDEX) {
+                                        if (data && data.type === Constants.TYPE.INDEX) {
                                             //If the data is an index, the data of the transactions of the index must be recovered.
                                             readingIndex = true;
                                             let index = data;
@@ -303,7 +303,7 @@ class Core extends EventEmitter {
 
                                             let onRaw = function () {
                                                 if (indexCount === indexTtxIds.length) {
-                                                    let newData = Content.ContentData.deserialize(Buffer.from(hexData, 'hex'));
+                                                    let newData = ContentData.deserialize(Buffer.from(hexData, 'hex'));
                                                     broadcastData(newData);
                                                     if (readingIndex) {
                                                         readingIndex = false;
@@ -320,7 +320,7 @@ class Core extends EventEmitter {
                                                     onRaw();
                                                 })
                                             })
-                                        } else {
+                                        } else if (data) {
                                             broadcastData(data);
                                         }
                                     } catch (e) {
@@ -340,7 +340,7 @@ class Core extends EventEmitter {
             })
         };
 
-        this.dbrunner.send('getLastExploredBlock', [], function (err, result) {
+        this.dbrunner.send('getLastExploredBlock', function (err, result) {
             if (!startBlock) {
                 if (err) {
                     console.log(err);
@@ -371,7 +371,7 @@ class Core extends EventEmitter {
                         } else if (startBlock >= blockCount) {
                             //Exploration finish
                             that.isExploring = false;
-                            that.dbrunner.send('updateLastExploredBlock', [--startBlock], function (err, result) {
+                            that.dbrunner.send('updateLastExploredBlock', --startBlock, function (err, result) {
                                 //console.log(err, result);
                             });
                             that.emit('core.explore.finish', blockCount, startBlock);
@@ -759,7 +759,7 @@ class Core extends EventEmitter {
         let that = this;
 
         setTimeout(function () {
-            that.dbrunner.send('getMediaByAddress', [contentAddress, userAddress], function (err, result) {
+            that.dbrunner.send('getMediaByAddress', contentAddress, userAddress, function (err, result) {
                 if (err) {
                     that.error(err);
                 } else {
@@ -843,7 +843,7 @@ class Core extends EventEmitter {
     }
 
     insertMedia(media, tx, date, callback) {
-        this.dbrunner.send('addMedia', [media, tx, date], callback);
+        this.dbrunner.send('addMedia', media, tx, date, callback);
     }
 
     /**
@@ -854,7 +854,7 @@ class Core extends EventEmitter {
      * @param callback
      */
     insertComment(comment, tx, date, callback) {
-        this.dbrunner.send('addComment', [comment, tx, date], callback);
+        this.dbrunner.send('addComment', comment, tx, date, callback);
     }
 
     /**
@@ -864,7 +864,7 @@ class Core extends EventEmitter {
      * @param callback
      */
     getUserData(address, userAddress, callback) {
-        this.dbrunner.send('getAuthor', [address, userAddress], callback);
+        this.dbrunner.send('getAuthor', address, userAddress, callback);
     }
 
     /**
@@ -874,17 +874,17 @@ class Core extends EventEmitter {
      * @param callback
      */
     searchByTags(tags, userAddress, callback) {
-        this.dbrunner.send('getMediaByTags', [tags, userAddress], callback);
+        this.dbrunner.send('getMediaByTags', tags, userAddress, callback);
     }
 
     log(...args) {
         args.unshift('core.log');
-        this.emit.apply(this, args);
+        this.emit.apply(this, ...args);
     }
 
     error(...args) {
         args.unshift('core.error');
-        this.emit.apply(this, args);
+        this.emit.apply(this, ...args);
     }
 }
 
