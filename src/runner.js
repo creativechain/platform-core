@@ -15,6 +15,10 @@ class Runner extends EventEmitter {
         this.prefix = prefix;
     }
 
+    /**
+     *
+     * @param {...args} args
+     */
     start(...args) {
         let that = this;
         this.fork = fork(this.script);
@@ -38,7 +42,7 @@ class Runner extends EventEmitter {
     /**
      *
      * @param {string} method
-     * @param {Array} params
+     * @param {...params} params
      */
     send(method, ...params) {
         let id = Utils.randomNumber(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
