@@ -1,6 +1,7 @@
 let Database = require('better-sqlite3');
 let {File} = require('../utils');
 let Error = require('../error');
+let {Constants} = require('trantor-js');
 
 /**
  *
@@ -351,9 +352,9 @@ IndexDB.prototype.getFollowers = function(profileAddress, userAddress, callback)
     this.select("SELECT f.follower_address, " +
         "u.* FROM 'Following' f " +
         "LEFT JOIN (SELECT a.*, " +
-        "(SELECT count(*) FROM 'Following' f2 WHERE a.address = f2.followed_address AND f2.follower_address = '" + userAddress + "' AND f2.type = " + PUBLICATION.TYPE.FOLLOW + ") AS is_following," +
+        "(SELECT count(*) FROM 'Following' f2 WHERE a.address = f2.followed_address AND f2.follower_address = '" + userAddress + "' AND f2.type = " + Constants.TYPE.FOLLOW + ") AS is_following," +
         "(SELECT t.file FROM 'Torrent' t WHERE t.magnet = a.avatar) AS avatarFile FROM 'Author' a) u ON " +
-        "(u.address = f.follower_address) WHERE f.followed_address = '" + profileAddress + "' AND f.type = " + PUBLICATION.TYPE.FOLLOW, callback);
+        "(u.address = f.follower_address) WHERE f.followed_address = '" + profileAddress + "' AND f.type = " + Constants.TYPE.FOLLOW, callback);
 };
 
 /**
@@ -366,9 +367,9 @@ IndexDB.prototype.getFollowing = function(profileAddress, userAddress, callback)
     this.select("SELECT f.followed_address, " +
         "u.* FROM 'Following' f " +
         "LEFT JOIN (SELECT a.*, " +
-        "(SELECT count(*) FROM 'Following' f2 WHERE a.address = f2.followed_address AND f2.follower_address = '" + userAddress + "' AND f2.type = " + PUBLICATION.TYPE.FOLLOW + ") AS is_following," +
+        "(SELECT count(*) FROM 'Following' f2 WHERE a.address = f2.followed_address AND f2.follower_address = '" + userAddress + "' AND f2.type = " + Constants.TYPE.FOLLOW + ") AS is_following," +
         "(SELECT t.file FROM 'Torrent' t WHERE t.magnet = a.avatar) AS avatarFile FROM 'Author' a) u ON " +
-        "(u.address = f.followed_address) WHERE f.follower_address = '" + profileAddress + "' AND f.type = " + PUBLICATION.TYPE.FOLLOW, callback);
+        "(u.address = f.followed_address) WHERE f.follower_address = '" + profileAddress + "' AND f.type = " + Constants.TYPE.FOLLOW, callback);
 };
 
 /**
@@ -383,7 +384,7 @@ IndexDB.prototype.getFollower = function(userAddress, followedAddress, callback)
         "LEFT JOIN (SELECT a.*, " +
         "(SELECT t.file FROM 'Torrent' t WHERE t.magnet = a.avatar) AS avatarFile " +
         "FROM 'Author' a) u ON " +
-        "(u.address = f.follower_address) WHERE f.follower_address = '" + userAddress + "' AND f.followed_address = '" + followedAddress + "' AND f.type = " + PUBLICATION.TYPE.FOLLOW, callback);
+        "(u.address = f.follower_address) WHERE f.follower_address = '" + userAddress + "' AND f.followed_address = '" + followedAddress + "' AND f.type = " + Constants.TYPE.FOLLOW, callback);
 };
 
 /**
@@ -397,7 +398,7 @@ IndexDB.prototype.getFollowingData = function(followerAddress, followedAddress, 
     this.select("SELECT f.*, " +
         "u.* FROM 'Following' f " +
         "LEFT JOIN (SELECT a.*, " +
-        "(SELECT count(*) FROM 'Following' f2 WHERE a.address = f2.followed_address AND f2.follower_address = '" + followerAddress + "' AND f2.type = " + PUBLICATION.TYPE.FOLLOW + ") AS is_following," +
+        "(SELECT count(*) FROM 'Following' f2 WHERE a.address = f2.followed_address AND f2.follower_address = '" + followerAddress + "' AND f2.type = " + Constants.TYPE.FOLLOW + ") AS is_following," +
         "(SELECT t.file FROM 'Torrent' t WHERE t.magnet = a.avatar) AS avatarFile FROM 'Author' a) u ON " +
         "(u.address = f.followed_address) WHERE f.follower_address = '" + followerAddress + "' AND f.followed_address = '" + followedAddress + "' AND f.type = " + type + ";", callback);
 };
@@ -409,7 +410,7 @@ IndexDB.prototype.getFollowingData = function(followerAddress, followedAddress, 
  * @param callback
  */
 IndexDB.prototype.getBlocked = function(author, resource, callback) {
-    this.getFollowingData(author, resource, PUBLICATION.TYPE.BLOCK, callback);
+    this.getFollowingData(author, resource, Constants.TYPE.BLOCK, callback);
 };
 
 /**
