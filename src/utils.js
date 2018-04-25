@@ -206,7 +206,7 @@ class File {
      */
     static getName(path) {
         path = File.normalizePath(path);
-        return path.split(Constants.FILE_SEPARATOR).pop();
+        return path.split('/').pop();
     }
 
     static mkdir(path) {
