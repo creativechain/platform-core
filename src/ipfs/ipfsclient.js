@@ -21,7 +21,7 @@ class IpfsClient extends IPFS {
             super();
         }
 
-        this.config = config;
+        this.configuration = config;
     }
 
     connect(swarm, callback) {
@@ -70,7 +70,7 @@ class IpfsClient extends IPFS {
                         form: {'ipfs': ipfsData.hash, }
                     };
 
-                    that.config.shareUrls.forEach(function (url) {
+                    that.configuration.shareUrls.forEach(function (url) {
                         url = url + ipfsData.hash;
                         options.url = url;
                         request(options, function (error, response, body) {
@@ -97,7 +97,7 @@ class IpfsClient extends IPFS {
     downloadFile(contentAddress, cid, privateContent, callback) {
         let that = this;
         if (cid) {
-            let desPath = this.config.dataDir + contentAddress;
+            let desPath = this.configuration.dataDir + contentAddress;
             if (privateContent) {
                 desPath += '-p'
             }

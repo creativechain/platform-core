@@ -19,7 +19,7 @@ class Core extends EventEmitter {
      */
     constructor(coreConfig, txContentAmount, txFeeKb) {
         super();
-        this.config = coreConfig;
+        this.configuration = coreConfig;
         this.txContentAmount = txContentAmount;
         this.txFeeKb = txFeeKb;
         this.constants = coreConfig.constants;
@@ -153,7 +153,7 @@ class Core extends EventEmitter {
             callCallback();
         });
 
-        this.ipfsrunner.start(this.config.ipfsConfig);
+        this.ipfsrunner.start(this.configuration.ipfsConfig);
 
         let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
         this.ipfsrunner.send('connect', swarm, function (err) {
