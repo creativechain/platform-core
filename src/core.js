@@ -1,4 +1,5 @@
 let {CoreConfiguration} = require('./config');
+let EventEmitter = require('events');
 let Runner = require('./runner');
 let RPCWallet = require('./rpcwallet');
 let Error = require('./error');
@@ -9,7 +10,7 @@ let {Constants, Content, TrantorUtils, ContentData, Author, Like, Follow, Unfoll
 let creativecoin = require('bitcoinjs-lib');
 
 
-class Core extends EventEmmitter {
+class Core extends EventEmitter {
     /**
      *
      * @param {CoreConfiguration} coreConfig
