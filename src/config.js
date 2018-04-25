@@ -48,19 +48,16 @@ class RPCConfiguration extends Configuration{
             this.rpcport = 1188;
             this.txindex = 1;
 
-            //Only for tests
-            if (this.constants.DEBUG) {
-                this.addnode = '144.217.106.112';
-            }
-
             //Windows not support daemon mode
             if (!OS.isWindows()) {
                 this.daemon = 1;
             }
 
             this.nodeConfigFile = constants.BIN_DIR + 'creativecoin.conf';
-            this.saveOn(this.nodeConfigFile);
         }
+
+        this.enableTestnet(constants.DEBUG);
+        this.saveOn(this.nodeConfigFile);
     }
 
     enableTestnet(enable) {

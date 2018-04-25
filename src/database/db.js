@@ -67,7 +67,7 @@ IndexDB.prototype.run = function(query, callback) {
         err = e;
     }
 
-    if (callback) {
+    if (callback && err) {
         callback(err.stack.toString(), null);
     }
 };
