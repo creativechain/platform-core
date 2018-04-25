@@ -30,7 +30,7 @@ MAIN_CONSTANTS.DAEMON_URL = MAIN_CONSTANTS.BINARIES_URL + 'creativecoind-';
 MAIN_CONSTANTS.CHECKSUMS_URL = MAIN_CONSTANTS.BINARIES_URL + 'sha256sums.txt';
 
 let TEST_CONSTANTS = {
-    DEBUG: false,
+    DEBUG: true,
     FILE_SLASH: OS.getPathSeparator(),
     APP_DIR: OS.getHome(),
     ASAR_DIR: OS.getAsarFolder(),
