@@ -1,4 +1,4 @@
-let {Runner} = require('../src/runner');
+/*let {Runner} = require('../src/runner');
 
 let dbRunner = new Runner('./src/database/dbrunner.js', 'db');
 
@@ -9,4 +9,7 @@ setTimeout(function () {
     dbRunner.send('getLastExploredBlock', [], function (err, result) {
         console.log('Response', err, result);
     })
-}, 3000);
+}, 3000);*/
+
+let platformCore = require('../index');
+console.log(platformCore);

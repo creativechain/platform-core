@@ -9,6 +9,7 @@ Core.Error = require('./src/error');
 Core.RPCWallet = require('./src/rpcwallet');
 Core.Runner = require('./src/runner');
 Core.Utils = require('./src/utils');
+Core.TxUtils = require('./src/txwrapper');
 
 if (module) {
     module.exports = Core;
