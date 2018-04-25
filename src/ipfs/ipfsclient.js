@@ -28,7 +28,7 @@ class IpfsClient extends IPFS {
         if (swarm) {
             this.swarm.connect(swarm, function (err) {
                 if (callback) {
-                    callback(err);
+                    callback(err.stack.toString());
                 }
             })
         } else if (callback) {
@@ -144,7 +144,7 @@ class IpfsClient extends IPFS {
 
     close() {
         let that = this;
-        this.node.stop(function () {
+        this.stop(function () {
             console.log('IPFS node stopped!');
         });
     }
