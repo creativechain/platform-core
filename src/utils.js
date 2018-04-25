@@ -224,11 +224,11 @@ class File {
     static mkpath(path, hasFile = false) {
         //console.log('Making dirs', path);
         path = File.normalizePath(path);
-        let dirs = path.split(Constants.FILE_SEPARATOR);
+        let dirs = path.split('/');
         let route = '';
         let length = hasFile ? dirs.length - 1 : dirs.length;
         for (let x = 0; x < length; x++) {
-            route += dirs[x] + Constants.FILE_SEPARATOR;
+            route += dirs[x] + '/';
             if (!File.exist(route)) {
                 File.mkdir(route);
             }
