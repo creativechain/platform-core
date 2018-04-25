@@ -45,7 +45,7 @@ class Core extends EventEmitter {
 
         let onFinish = function () {
             console.log('checkBinaryExists - onFinish');
-            File.chmod(this.constants.BIN_DIR + binaryName, "0744"); //Set permissions rwx r-- ---
+            File.chmod(that.constants.BIN_DIR + binaryName, "0744"); //Set permissions rwx r-- ---
             that.emit('core.daemon.downloading', 100);
             callback(true);
         };
