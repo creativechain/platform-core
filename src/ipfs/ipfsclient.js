@@ -98,7 +98,7 @@ class IpfsClient extends IPFS {
      * @param callback
      * @param {boolean} privateContent
      */
-    downloadFile(contentAddress, cid, callback, privateContent = false) {
+    downloadFile(contentAddress, cid, privateContent, callback) {
         let that = this;
         if (cid) {
             let desPath = this.config.dataDir + contentAddress;
