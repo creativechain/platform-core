@@ -13,16 +13,28 @@ class Core extends EventEmmitter {
     /**
      *
      * @param {CoreConfiguration} coreConfig
+     * @param {number} txContentAmount
+     * @param {number} txFeeKb
      */
-    constructor(coreConfig) {
+    constructor(coreConfig, txContentAmount, txFeeKb) {
         super();
         this.config = coreConfig;
+        this.txContentAmount = txContentAmount;
+        this.txFeeKb = txFeeKb;
         this.constants = coreConfig.constants;
         this.dbrunner = new Runner(__dirname + '/database/dbrunner.js', 'db');
         this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs');
         this.rpcWallet = RPCWallet.buildClient(coreConfig.rpcConfig);
         this.isInitializing = false;
         this.isExploring = false;
+
+        if (!this.txContentAmount) {
+            throw Error.UNDEFINED_TX_CONTENT_AMOUNT;
+        }
+
+        if (!this.txFeeKb) {
+            throw Error.UNDEFINED_TX_FEE_RATE;
+        }
     }
 
     __checkBinariesExists(callback) {
@@ -548,7 +560,7 @@ class Core extends EventEmmitter {
      */
     createDataTransaction(data, destinyAddress, amount, callback) {
         this.log(data);
-        amount = amount ? amount : TX_CONTENT_AMOUNT; //TODO: SET TX_CONTENT_AMOUNT
+        amount = amount ? amount : this.txContentAmount;
         let that = this;
         let onBuild = function (txBuilder, creaBuilder) {
             if (callback) {
@@ -563,7 +575,7 @@ class Core extends EventEmmitter {
                 that.buildDataOutput(data, function (opReturnData) {
                     let dataSize = opReturnData.length;
 
-                    let txBuilder = new TransactionBuilder(that.constants.NETWORK, TX_FEE_KB, dataSize); //TODO: SET TX_FEE_KB
+                    let txBuilder = new TransactionBuilder(that.constants.NETWORK, that.txFeeKb, dataSize);
 
                     that.client.getRawChangeAddress(function (err, result) {
                         if (err) {
