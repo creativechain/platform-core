@@ -28,7 +28,15 @@ class IpfsClient extends IPFS {
         if (swarm) {
             this.swarm.connect(swarm, function (err) {
                 if (callback) {
-                    callback(err.stack.toString());
+                    if (err) {
+                        if (err.stack) {
+                            callback(err.stack.toString());
+                        } else {
+                            callback(err.toString());
+                        }
+                    } else {
+                        callback(null);
+                    }
                 }
             })
         } else if (callback) {
