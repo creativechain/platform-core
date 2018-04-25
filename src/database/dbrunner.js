@@ -1,10 +1,11 @@
-let { IndexDB } = require('./db');
+let IndexDB = require('./db');
 
 let db = null;
 
 function bindMethod(data) {
     if (data.method === 'start') {
         db = new IndexDB(data.arguments[0], data.arguments[1]);
+        console.log(db)
     } else {
         let method = db[data.method];
         data.arguments.push(function () {

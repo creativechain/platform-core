@@ -10,14 +10,16 @@ let {Error} = require('../error');
  * @constructor
  */
 function IndexDB (databaseFile, creationFile, debug = true) {
-    this.creationFile = creationFile;
-    this.debug = debug;
 
-    if (!this.creationFile || !File.exist(creationFile)) {
+    if (!creationFile || !File.exist(creationFile)) {
         throw Error.NO_DB_CREATION_FILE
     }
 
-    return new Database(databaseFile);
+    let db = new Database(databaseFile);
+    db.creationFile = creationFile;
+    db.debug = debug;
+
+    return db;
 }
 
 IndexDB.prototype = Database.prototype;
@@ -73,24 +75,30 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
     let that = this;
 
     if (migrationDir && File.exist(migrationDir)) {
+
+        let callCallback = function (err) {
+            if (callback) {
+                callback(err);
+            }
+        };
+
         this.select('PRAGMA user_version;', function (err, result) {
             if (err) {
-
+                callCallback(err);
             } else {
                 let performMigration = function (version) {
                     let file = migrationDir + version + '.sql';
-                    console.log('Performing migration', version);
                     if (File.exist(file)) {
                         let queries = File.read(file);
                         that.run(queries, function (err) {
                             if (!err) {
                                 performMigration(++version);
                             } else {
-                                console.error(err);
+                                callCallback(err)
                             }
                         })
-                    } else if (callback) {
-                        callback()
+                    } else {
+                        callCallback(null)
                     }
                 };
 
@@ -98,8 +106,11 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
                 if (version === 0) {
                     let sqlCreationQueries = File.read(that.creationFile);
                     that.exec(sqlCreationQueries, function (err) {
-                        console.log('Database initialized', err);
-                        performMigration(++version);
+                        if (err) {
+                            callCallback(err);
+                        } else {
+                            performMigration(++version);
+                        }
                     });
                 } else {
                     performMigration(version);
