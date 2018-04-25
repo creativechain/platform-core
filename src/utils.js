@@ -48,7 +48,7 @@ class OS {
      * @return {string}
      */
     static getAsarFolder() {
-        let path = __dirname;
+        let path = __dirname + '/../../../';
         path = path.replace('\\l', '/l')
             .replace('/lib', '');
 
