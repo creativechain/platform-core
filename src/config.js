@@ -32,6 +32,16 @@ class RPCConfiguration extends Configuration{
                 let vals = l.split('=');
                 this[vals[0]] = vals[1];
             }
+        } else {
+            this.setIfNotExist('rpcuser', Utils.randomString(9));
+            this.setIfNotExist('rpcpassword', Utils.randomString(9));
+            this.setIfNotExist('rpcworkqueue', 10000);
+            this.setIfNotExist('port', Utils.randomNumber(20000, 65535));
+            this.rpcport = 1188;
+            this.txindex = 1;
+
+            let rpcConfFile = constants.BIN_DIR + 'creativecoin.conf';
+            this.saveOn(rpcConfFile);
         }
     }
 
@@ -144,7 +154,7 @@ class CoreConfiguration extends Configuration {
      */
     constructor(constants, rpcConfig, ipfsConfig) {
         super(constants);
-        this.rpcConfig = rpcConfig ? rpcConfig : RPCConfiguration.create(constants);
+        this.rpcConfig = rpcConfig ? rpcConfig : RPCConfiguration.getDefault(constants);
         this.ipfsConfig = ipfsConfig ? ipfsConfig : IpfsConfiguration.getDefault(constants);
 
         if (!constants) {
