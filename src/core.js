@@ -282,7 +282,7 @@ class Core extends EventEmitter {
                                 count++;
                                 onReadTx();
                             } else {
-                                let tx = DecodedTransaction.fromHex(rawTx);
+                                let tx = DecodedTransaction.fromHex(rawTx, that.constants.NETWORK);
 
                                 //console.log('Processing transaction with', tx.outputs.length, 'outputs');
                                 if (tx.containsData()) {

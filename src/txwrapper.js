@@ -345,20 +345,21 @@ class DecodedTransaction {
 
     /**
      *
-     * @param txHex
-     * @returns {DecodedTransaction}
+     * @param {string} txHex
+     * @param {TrantorNetwork} network
+     * @return {DecodedTransaction}
      */
-    static fromHex(txHex) {
+    static fromHex(txHex, network) {
         let dtx = new DecodedTransaction(txHex);
         let tx = creativecoin.Transaction.fromHex(txHex);
 
         tx.ins.forEach(function (input) {
-            let txInput = new TxInput(this.network, input.hash.toString('hex'), input.index, input.script.toString('hex'), input.sequence, input.witness);
+            let txInput = new TxInput(network, input.hash.toString('hex'), input.index, input.script.toString('hex'), input.sequence, input.witness);
             dtx.inputs.push(txInput);
         });
 
         tx.outs.forEach(function (output, index) {
-            let txOutput = new TxOutput(this.network, output.script.toString('hex'), output.value, index);
+            let txOutput = new TxOutput(network, output.script.toString('hex'), output.value, index);
             dtx.outputs.push(txOutput);
         });
 

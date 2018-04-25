@@ -1,5 +1,5 @@
 let {TrantorNetwork} = require('trantor-js');
-let {Utils, File} = require('./utils');
+let {Utils, File, OS} = require('./utils');
 let {MainnetConstants, TestnetConstants} = require('./constants');
 let Error = require('./error');
 
@@ -23,7 +23,12 @@ class RPCConfiguration extends Configuration{
      */
     constructor(constants, nodeConfigFile) {
         super(constants);
-        if (nodeConfigFile && File.exist(nodeConfigFile)) {
+
+        if (!nodeConfigFile) {
+            nodeConfigFile = constants.BIN_DIR + 'creativecoin.conf';
+        }
+
+        if (File.exist(nodeConfigFile)) {
             let configuration = File.read(nodeConfigFile);
             let lines = configuration.split('\n');
 
@@ -32,6 +37,9 @@ class RPCConfiguration extends Configuration{
                 let vals = l.split('=');
                 this[vals[0]] = vals[1];
             }
+
+            this.nodeConfigFile = nodeConfigFile;
+
         } else {
             this.setIfNotExist('rpcuser', Utils.randomString(9));
             this.setIfNotExist('rpcpassword', Utils.randomString(9));
@@ -40,8 +48,28 @@ class RPCConfiguration extends Configuration{
             this.rpcport = 1188;
             this.txindex = 1;
 
-            let rpcConfFile = constants.BIN_DIR + 'creativecoin.conf';
-            this.saveOn(rpcConfFile);
+            //Only for tests
+            if (this.constants.DEBUG) {
+                this.addnode = '144.217.106.112';
+            }
+
+            //Windows not support daemon mode
+            if (!OS.isWindows()) {
+                this.daemon = 1;
+            }
+
+            this.nodeConfigFile = constants.BIN_DIR + 'creativecoin.conf';
+            this.saveOn(this.nodeConfigFile);
+        }
+    }
+
+    enableTestnet(enable) {
+        if (enable) {
+            this.testnet = 1;
+            this.addnode = '144.217.106.112';
+        } else {
+            this.testnet = 0;
+            this.addnode = null;
         }
     }
 
@@ -78,9 +106,13 @@ class RPCConfiguration extends Configuration{
         for (let x = 0; x < keys.length; x++) {
             let k = keys[x];
             let val = this[k];
-            if (k.length > 0) {
-                content += k + '=' + val + '\n';
+
+            if (val !== null && val !== this.nodeConfigFile) {
+                if (k.length > 0) {
+                    content += k + '=' + val + '\n';
+                }
             }
+
         }
 
         File.write(file, content);
@@ -101,6 +133,13 @@ class RPCConfiguration extends Configuration{
         rpcConf.rpcport = 1188;
         rpcConf.txindex = 1;
 
+        rpcConf.enableTestnet(constants.DEBUG);
+
+        //Windows not support daemon mode
+        if (!OS.isWindows()) {
+            rpcConf.daemon = 1;
+        }
+
         let rpcConfFile = constants.BIN_DIR + 'creativecoin.conf';
         rpcConf.saveOn(rpcConfFile);
 
@@ -114,11 +153,10 @@ class RPCConfiguration extends Configuration{
      */
     static getDefault(constants) {
         if (constants) {
-            let rpcConfFile = constants.BIN_DIR + 'creativecoin.conf';
-            return new RPCConfiguration(constants, rpcConfFile);
+            return new RPCConfiguration(constants);
         }
 
-        return RPCConfiguration.create();
+        return RPCConfiguration.create(constants);
     }
 
 }
