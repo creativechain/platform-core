@@ -1,6 +1,6 @@
 {
   "name": "creativechain-platform-core",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Creativechain Platform Core",
   "main": "index.js",
   "scripts": {
