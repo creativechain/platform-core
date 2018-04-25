@@ -10,12 +10,11 @@ class RPCWallet extends RpcClient {
     /**
      *
      * @param {RPCConfiguration} config
-     * @param constants
      */
-    static buildClient(config, constants) {
+    static buildClient(config) {
         if (!config) {
             config = RPCConfiguration.create();
-            config.saveOn(constants.BIN_DIR + 'creativecoin.conf');
+            config.saveOn(config.constants.BIN_DIR + 'creativecoin.conf');
         }
 
         let rpcConnection = {
@@ -23,7 +22,7 @@ class RPCWallet extends RpcClient {
             password: config.rpcpassword,
             host: '127.0.0.1',
             port: config.rpcport,
-            network: constants.DEBUG ? 'testnet' : 'mainnet'
+            network: config.constants.DEBUG ? 'testnet' : 'mainnet'
         };
 
         return new RPCWallet(rpcConnection);

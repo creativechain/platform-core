@@ -1,9 +1,28 @@
 let {TrantorNetwork} = require('trantor-js');
 let {Utils, File} = require('./utils');
 let {MainConstants, TestnetConstants} = require('./constants');
+let {Error} = require('error');
 
-class RPCConfiguration {
-    constructor(nodeConfigFile) {
+class Configuration {
+
+    /**
+     *
+     * @param constants
+     */
+    constructor(constants = MainConstants) {
+        this.constants = constants;
+    }
+}
+
+class RPCConfiguration extends Configuration{
+
+    /**
+     *
+     * @param constants
+     * @param nodeConfigFile
+     */
+    constructor(constants, nodeConfigFile) {
+        super(constants);
         if (nodeConfigFile && File.exist(nodeConfigFile)) {
             let configuration = File.read(nodeConfigFile);
             let lines = configuration.split('\n');
@@ -75,31 +94,54 @@ class RPCConfiguration {
     }
 }
 
-class TrantorConfiguration {
+class IpfsConfiguration extends Configuration{
 
     /**
      *
-     * @param {TrantorNetwork} network
-     * @param {RPCConfiguration} rpcConfig
-     * @param {{}} constants
+     * @param constants
+     * @param {string} ipfsDir
+     * @param dataDir
+     * @param {Array} ipfsShareUrls
      */
-    constructor(network, rpcConfig, constants) {
-        this.network = network ? network : TrantorNetwork.TESTNET;
-        this.rpcConfig = rpcConfig ? rpcConfig : RPCConfiguration.create();
+    constructor(constants, ipfsDir, dataDir, ipfsShareUrls) {
+        super(constants);
+        this.ipfsDir = ipfsDir ? ipfsDir : this.constants.IPFS_DIR;
+        this.dataDir = dataDir ? dataDir : this.constants.DATA_DIR;
+        this.shareUrls = Array.isArray(ipfsShareUrls) ? ipfsShareUrls : [];
+    }
 
-        if (constants) {
-            this.constants = constants;
-        } else if (this.network === TrantorNetwork.TESTNET) {
-            this.constants = TestnetConstants;
-        } else {
-            this.constants = MainConstants;
+    static getDefault(constants) {
+        return new IpfsConfiguration(constants);
+    }
+}
+
+class CoreConfiguration extends Configuration {
+
+    /**
+     *
+     * @param constants
+     * @param {RPCConfiguration} rpcConfig
+     * @param {IpfsConfiguration} ipfsConfig
+     */
+    constructor(constants, rpcConfig, ipfsConfig) {
+        super(constants);
+        this.rpcConfig = rpcConfig ? rpcConfig : RPCConfiguration.create();
+        this.ipfsConfig = ipfsConfig ? ipfsConfig : IpfsConfiguration.getDefault(constants);
+
+        if (!constants) {
+            throw  Error.CONSTANTS_NOT_FOUND;
         }
 
+        if (this.constants === MainConstants) {
+            this.network = TrantorNetwork.MAINNET;
+        } else {
+            this.network = TrantorNetwork.TESTNET;
+        }
     }
 }
 
 if (module) {
     module.exports = {
-        RPCConfiguration, TrantorConfiguration
+        RPCConfiguration, IpfsConfiguration, CoreConfiguration
     }
 }

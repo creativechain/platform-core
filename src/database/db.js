@@ -1,11 +1,26 @@
-let Sqlite3 = require('better-sqlite3');
-let {File} = require('utils');
-let {DecodedTransaction} = require('txwrapper');
+let Database = require('better-sqlite3');
+let {File} = require('../utils');
+let {Error} = require('../error');
 
-function IndexDB(file, debug = true) {
-    Sqlite3.call(this, file);
+/**
+ *
+ * @param {string} databaseFile
+ * @param {string} creationFile
+ * @param {boolean} debug
+ * @constructor
+ */
+function IndexDB (databaseFile, creationFile, debug = true) {
+    this.creationFile = creationFile;
     this.debug = debug;
+
+    if (!this.creationFile || !File.exist(creationFile)) {
+        throw Error.NO_DB_CREATION_FILE
+    }
+
+    return new Database(databaseFile);
 }
+
+IndexDB.prototype = Database.prototype;
 
 /**
  *
@@ -13,9 +28,9 @@ function IndexDB(file, debug = true) {
  * @param callback
  */
 IndexDB.prototype.select = function(query, callback) {
-    let statement = this.prepare(query);
 
     try {
+        let statement = this.prepare(query);
         let rows = statement.all();
         if (callback) {
             if (!rows) {
@@ -28,7 +43,7 @@ IndexDB.prototype.select = function(query, callback) {
         }
     } catch (e) {
         if (callback) {
-            callback(e, null);
+            callback(e.stack.toString(), null);
         }
     }
 
@@ -50,10 +65,9 @@ IndexDB.prototype.run = function(query, callback) {
     }
 
     if (callback) {
-        callback(err);
+        callback(err.stack.toString(), null);
     }
 };
-
 
 IndexDB.prototype.migrate = function (migrationDir, callback) {
     let that = this;
@@ -82,7 +96,7 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
 
                 let version = parseInt(result[0].user_version);
                 if (version === 0) {
-                    let sqlCreationQueries = File.read(Constants.DATABASE_CREATION_FILE);
+                    let sqlCreationQueries = File.read(that.creationFile);
                     that.exec(sqlCreationQueries, function (err) {
                         console.log('Database initialized', err);
                         performMigration(++version);
@@ -954,5 +968,7 @@ IndexDB.prototype.getDonationFromMedia = function(mediaAddress, callback) {
 };
 
 if (module) {
-    module.exports = IndexDB;
+    module.exports = {
+        IndexDB
+    };
 }

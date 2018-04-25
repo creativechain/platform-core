@@ -29,13 +29,13 @@
     "altcoin-rpc": "^1.0.2",
     "better-sqlite3": "^4.1.0",
     "bitcoinjs-lib": "^3.3.2",
-    "coinselect": "git://github.com/creativechain/coinselect.git",
+    "coinselect": "github:creativechain/coinselect",
     "file-size": "^1.0.0",
     "ipfs": "github:creativechain/js-ipfs",
     "lzma": "^2.3.2",
     "path": "^0.12.7",
     "sha256": "^0.2.0",
-    "trantor-js": "^0.3.3",
+    "trantor-js": "^0.3.4",
     "upath": "^1.0.4"
   }
 }

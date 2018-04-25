@@ -1,26 +1,8 @@
 const IPFS = require('ipfs');
-const Constants = require('constants');
-const {Error} = require('error');
-const {File} = require('utils');
+const {Error} = require('../error');
+const {File} = require('../utils');
 
-class IpfsConfiguration {
 
-    /**
-     *
-     * @param {string} ipfsDir
-     * @param dataDir
-     * @param {Array} ipfsShareUrls
-     */
-    constructor(ipfsDir, dataDir, ipfsShareUrls) {
-        this.ipfsDir = ipfsDir ? ipfsDir : Constants.MainConstants.IPFS_DIR;
-        this.dataDir = dataDir ? dataDir : Constants.MainConstants.DATA_DIR;
-        this.shareUrls = Array.isArray(ipfsShareUrls) ? ipfsShareUrls : [];
-    }
-
-    static getDefault() {
-        return new IpfsConfiguration();
-    }
-}
 
 class IpfsClient extends IPFS {
 
@@ -30,7 +12,7 @@ class IpfsClient extends IPFS {
      */
     constructor(config) {
         if (!config) {
-            config = IpfsConfiguration.getDefault();
+            throw Error.IPFS_CONF_NOT_FOUND;
         }
 
         if (config.ipfsDir) {
@@ -45,25 +27,27 @@ class IpfsClient extends IPFS {
     }
 
     connect(swarm, callback) {
-        let that = this;
         if (swarm) {
             this.swarm.connect(swarm, function (err) {
-                if (err) {
-                    that.emit('connectionError', err);
-                } else {
-                    that.emit('connectionSuccess')
+                if (callback) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback(null);
+                    }
                 }
             })
-        } else {
-            this.emit('connectionError', Error.INVALID_SWARM);
+        } else if (callback) {
+            callback(Error.INVALID_SWARM);
         }
     }
 
     /**
      *
      * @param {string} file
+     * @param callback
      */
-    createFile(file) {
+    createFile(file, callback) {
         let that = this;
 
         let name = File.getName(file);
@@ -71,8 +55,8 @@ class IpfsClient extends IPFS {
         let fileBuffer = File.read(file, null);
 
         this.files.add(fileBuffer, function (err, resultFiles) {
-            if (err) {
-                that.emit('addError', err);
+            if (err && callback) {
+                callback(err.stack.toString(), null, null)
             } else if (resultFiles.length > 0) {
                 let ipfsData = resultFiles[0];
                 ipfsData.infoHash = ipfsData.hash;
@@ -102,10 +86,9 @@ class IpfsClient extends IPFS {
 
                 }, 100);
 
-                that.emit('addFile', file, ipfsData)
-            } else {
-                that.emit('addFileEmpty', file);
-                console.error('IPFS not build files', resultFiles)
+                if (callback) {
+                    callback(null, file, ipfsData);
+                }
             }
         })
     }
@@ -113,27 +96,27 @@ class IpfsClient extends IPFS {
     /**
      *
      * @param {string} contentAddress
-     * @param {string} magnet
+     * @param {string} cid
      * @param callback
      * @param {boolean} privateContent
      */
-    downloadFile(contentAddress, magnet, callback, privateContent = false) {
+    downloadFile(contentAddress, cid, callback, privateContent = false) {
         let that = this;
-        if (magnet) {
+        if (cid) {
             let desPath = this.config.dataDir + contentAddress;
             if (privateContent) {
                 desPath += '-p'
             }
 
             desPath += '/';
-            let hash = magnet.split('/')[0];
-            let name = magnet.split('/')[1];
+            let hash = cid.split('/')[0];
+            let name = cid.split('/')[1];
 
             this.files.get(hash, function (err, files) {
                 if (err) {
                     console.error(err);
                 } else {
-                    console.log('File downloaded!', magnet, files);
+                    console.log('File downloaded!', cid, files);
 
                     let data = null;
                     for (let x = 0; x < files.length; x++) {
@@ -155,11 +138,10 @@ class IpfsClient extends IPFS {
 
                     if (callback) {
                         data.infoHash = hash;
-                        data.CID = magnet;
+                        data.CID = cid;
                         data.path = desPath;
                         data.destFile = file;
                         callback(data, file, contentAddress);
-                        that.emit('download', data, file, contentAddress);
                     }
                 }
             })
@@ -170,7 +152,6 @@ class IpfsClient extends IPFS {
         let that = this;
         this.node.stop(function () {
             console.log('IPFS node stopped!');
-            that.emit('stopped');
         });
     }
 }
