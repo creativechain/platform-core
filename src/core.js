@@ -887,7 +887,5 @@ class Core extends EventEmmitter {
 }
 
 if (module) {
-    module.exports = {
-        Core
-    }
+    module.exports = Core
 }
