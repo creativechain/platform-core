@@ -1,6 +1,6 @@
 let {TrantorNetwork} = require('trantor-js');
 let {Utils, File} = require('./utils');
-let {MainConstants, TestnetConstants} = require('./constants');
+let {MainnetConstants, TestnetConstants} = require('./constants');
 let Error = require('./error');
 
 class Configuration {
@@ -9,7 +9,7 @@ class Configuration {
      *
      * @param constants
      */
-    constructor(constants = MainConstants) {
+    constructor(constants = MainnetConstants) {
         this.constants = constants;
     }
 }
@@ -132,7 +132,7 @@ class CoreConfiguration extends Configuration {
             throw  Error.CONSTANTS_NOT_FOUND;
         }
 
-        if (this.constants === MainConstants) {
+        if (this.constants === MainnetConstants) {
             this.network = TrantorNetwork.MAINNET;
         } else {
             this.network = TrantorNetwork.TESTNET;

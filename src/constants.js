@@ -59,7 +59,7 @@ TEST_CONSTANTS.CHECKSUMS_URL = TEST_CONSTANTS.BINARIES_URL + 'sha256sums.txt';
 
 if (module) {
     module.exports = {
-        MainConstants: MAIN_CONSTANTS,
+        MainnetConstants: MAIN_CONSTANTS,
         TestnetConstants: TEST_CONSTANTS
     };
 }
