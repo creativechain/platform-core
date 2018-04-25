@@ -62,7 +62,7 @@ class Core extends EventEmitter {
                 checksum = true;
 
                 if (!error.includes('ETIMEDOUT')) {
-                    that.emit('core.interneterror', error);
+                    that.error(error);
                 }
             } else {
                 content = File.read(checksumFile);
