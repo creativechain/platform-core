@@ -1,12 +1,12 @@
 let { IpfsClient } = require('./ipfsclient');
 
-let db = null;
+let ipfsClient = null;
 
 function bindMethod(data) {
     if (data.method === 'start') {
-        db = new IpfsClient(data.arguments[0]);
+        ipfsClient = new IpfsClient(data.arguments[0]);
     } else {
-        let method = db[data.method];
+        let method = ipfsClient[data.method];
         data.arguments.push(function () {
             let args = Object.values(arguments);
             let response = {
@@ -15,12 +15,12 @@ function bindMethod(data) {
             };
             process.send(response);
         });
-        method.apply(db, data.arguments)
+        method.apply(ipfsClient, data.arguments)
     }
 }
 
 function closeDb() {
-    db.close();
+    ipfsClient.close();
     process.kill(process.pid, 'SIGKILL')
 }
 
