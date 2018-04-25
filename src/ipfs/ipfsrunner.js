@@ -19,7 +19,7 @@ function bindMethod(data) {
     }
 }
 
-function closeDb() {
+function closeClient() {
     ipfsClient.close();
     process.kill(process.pid, 'SIGKILL')
 }
@@ -28,4 +28,4 @@ process.on('message', (data) => {
     bindMethod(data);
 });
 
-process.on('SIGTERM', closeDb);
+process.on('SIGTERM', closeClient);
