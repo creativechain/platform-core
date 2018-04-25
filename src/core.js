@@ -78,7 +78,7 @@ class Core extends EventEmitter {
 
 
             let downloadDaemon = function () {
-                File.download(this.constants.DAEMON_URL + binPlatform, binaryFile, function (progress) {
+                File.download(that.constants.DAEMON_URL + binPlatform, binaryFile, function (progress) {
                     console.log('Downloading daemon', progress + '%');
                     that.emit('core.daemon.downloading', progress);
                 }, function () {
