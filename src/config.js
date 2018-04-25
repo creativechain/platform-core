@@ -1,7 +1,7 @@
 let {TrantorNetwork} = require('trantor-js');
 let {Utils, File} = require('./utils');
 let {MainConstants, TestnetConstants} = require('./constants');
-let {Error} = require('error');
+let Error = require('error');
 
 class Configuration {
 

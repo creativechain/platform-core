@@ -321,7 +321,7 @@ class File {
     static formatFileSize(file) {
         let stat = File.fileInfo(file);
         if (stat) {
-            return stat.formatSize.hume('jedec');
+            return stat.formatSize.human('jedec');
         }
 
         return '0.00 B';

@@ -1,7 +1,7 @@
 let {CoreConfiguration} = require('./config');
-let {Runner} = require('./runner');
-let {RPCWallet} = require('./rpcwallet');
-let {Error} = require('./error');
+let Runner = require('./runner');
+let RPCWallet = require('./rpcwallet');
+let Error = require('./error');
 let {OS, File, Utils} = require('./utils');
 let {DecodedTransaction, Spendable, TransactionBuilder} = require('./txwrapper');
 let {Constants, Content, TrantorUtils, ContentData, Author, Like, Follow, Unfollow, MediaData, Comment, Payment,

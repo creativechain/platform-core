@@ -57,7 +57,5 @@ class Runner extends EventEmitter {
 }
 
 if (module) {
-    module.exports = {
-        Runner
-    }
+    module.exports = Runner;
 }

@@ -968,7 +968,5 @@ IndexDB.prototype.getDonationFromMedia = function(mediaAddress, callback) {
 };
 
 if (module) {
-    module.exports = {
-        IndexDB
-    };
+    module.exports = IndexDB;
 }

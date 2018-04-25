@@ -1,7 +1,6 @@
 const creativecoin = require('bitcoinjs-lib');
 const coinselect = require('coinselect');
-const {TrantorUtils, TrantorNetwork, Content} = require('trantor-js');
-const {ContentData} = Content;
+const {TrantorUtils, TrantorNetwork, ContentData} = require('trantor-js');
 const {Utils} = require('utils');
 
 class TxInput {

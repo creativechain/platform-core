@@ -13,7 +13,5 @@ let Error = {
 };
 
 if (module) {
-    module.exports = {
-        Error
-    };
+    module.exports = Error;
 }

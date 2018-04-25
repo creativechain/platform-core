@@ -1,8 +1,6 @@
 const IPFS = require('ipfs');
-const {Error} = require('../error');
+const Error = require('../error');
 const {File} = require('../utils');
-
-
 
 class IpfsClient extends IPFS {
 
@@ -157,7 +155,5 @@ class IpfsClient extends IPFS {
 }
 
 if (module) {
-    module.exports = {
-        IpfsConfiguration, IpfsClient
-    }
+    module.exports = IpfsClient
 }
