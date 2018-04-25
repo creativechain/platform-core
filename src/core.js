@@ -120,6 +120,7 @@ class Core extends EventEmitter {
     }
 
     __initClients(callback) {
+        let that = this;
         let inits = 3;
 
         let callCallback = function () {
