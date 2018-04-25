@@ -1,6 +1,6 @@
 let Database = require('better-sqlite3');
 let {File} = require('../utils');
-let {Error} = require('../error');
+let Error = require('../error');
 
 /**
  *

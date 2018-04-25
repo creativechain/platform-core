@@ -9,7 +9,7 @@ dbRunner.send('migrate', ['/home/ander/WebstormProjects/creativechain-universe/e
 
 setTimeout(function () {
 
-    dbRunner.send('getLastExploredBlock', [], function (err, result) {
+    dbRunner.send('getLastExploredBlock', function (err, result) {
         console.log('Response', err, result);
     })
 }, 3000);

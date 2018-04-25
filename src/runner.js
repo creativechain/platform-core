@@ -32,17 +32,24 @@ class Runner extends EventEmitter {
             that.emit('close', code, signal);
         });
 
-        this.send('start', args);
+        this.send('start', ...args);
     }
 
     /**
      *
      * @param {string} method
      * @param {Array} params
-     * @param callback
      */
-    send(method, params, callback) {
+    send(method, ...params) {
         let id = Utils.randomNumber(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
+
+        let callback = params[params.length -1];
+
+        if (callback instanceof Function) {
+            params.pop();
+        } else {
+            callback = null;
+        }
 
         if (callback) {
             this.on(this.prefix + '.' + id, callback)
