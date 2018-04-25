@@ -7,7 +7,7 @@ function bindMethod(data) {
         ipfsClient = new IpfsClient(data.arguments[0]);
         let response = {
             event: 'ipfs.' + data.id,
-            response: 'ready'
+            response: ['ready']
         };
         ipfsClient.on('ready', function () {
             process.send(response);
