@@ -5,6 +5,13 @@ let ipfsClient = null;
 function bindMethod(data) {
     if (data.method === 'start') {
         ipfsClient = new IpfsClient(data.arguments[0]);
+        let response = {
+            event: 'ipfs.' + data.id,
+            response: 'ready'
+        };
+        ipfsClient.on('ready', function () {
+            process.send(response);
+        })
     } else {
         let method = ipfsClient[data.method];
         let response = {
