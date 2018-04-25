@@ -7,15 +7,21 @@ function bindMethod(data) {
         db = new IndexDB(data.arguments[0], data.arguments[1]);
     } else {
         let method = db[data.method];
+        let response = {
+            event: 'db.' + data.id,
+        };
+
         data.arguments.push(function () {
-            let args = Object.values(arguments);
-            let response = {
-                event: 'db.' + data.id,
-                response: args,
-            };
+            response.response = Object.values(arguments);
             process.send(response);
         });
-        method.apply(db, data.arguments)
+
+        if (method) {
+            method.apply(db, data.arguments)
+        } else {
+            response.response = [Error.FUNCTION_NOT_FOUND, data.method];
+            process.send(response);
+        }
     }
 }
 

@@ -7,15 +7,21 @@ function bindMethod(data) {
         ipfsClient = new IpfsClient(data.arguments[0]);
     } else {
         let method = ipfsClient[data.method];
+        let response = {
+            event: 'ipfs.' + data.id,
+        };
+
         data.arguments.push(function () {
-            let args = Object.values(arguments);
-            let response = {
-                event: 'ipfs.' + data.id,
-                response: args,
-            };
+            response.response = Object.values(arguments);
             process.send(response);
         });
-        method.apply(ipfsClient, data.arguments)
+
+        if (method) {
+            method.apply(ipfsClient, data.arguments)
+        } else {
+            response.response = [Error.FUNCTION_NOT_FOUND, data.method];
+            process.send(response);
+        }
     }
 }
 
