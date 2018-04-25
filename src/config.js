@@ -79,10 +79,11 @@ class RPCConfiguration extends Configuration{
 
     /**
      *
+     * @param constants
      * @return {RPCConfiguration}
      */
-    static create() {
-        let rpcConf = new RPCConfiguration();
+    static create(constants) {
+        let rpcConf = new RPCConfiguration(constants);
         rpcConf.setIfNotExist('rpcuser', Utils.randomString(9));
         rpcConf.setIfNotExist('rpcpassword', Utils.randomString(9));
         rpcConf.setIfNotExist('rpcworkqueue', 10000);
@@ -90,8 +91,26 @@ class RPCConfiguration extends Configuration{
         rpcConf.rpcport = 1188;
         rpcConf.txindex = 1;
 
+        let rpcConfFile = constants.BIN_DIR + 'creativecoin.conf';
+        rpcConf.saveOn(rpcConfFile);
+
         return rpcConf;
     }
+
+    /**
+     *
+     * @param constants
+     * @return {RPCConfiguration}
+     */
+    static getDefault(constants) {
+        if (constants) {
+            let rpcConfFile = constants.BIN_DIR + 'creativecoin.conf';
+            return new RPCConfiguration(constants, rpcConfFile);
+        }
+
+        return RPCConfiguration.create();
+    }
+
 }
 
 class IpfsConfiguration extends Configuration{
@@ -125,7 +144,7 @@ class CoreConfiguration extends Configuration {
      */
     constructor(constants, rpcConfig, ipfsConfig) {
         super(constants);
-        this.rpcConfig = rpcConfig ? rpcConfig : RPCConfiguration.create();
+        this.rpcConfig = rpcConfig ? rpcConfig : RPCConfiguration.create(constants);
         this.ipfsConfig = ipfsConfig ? ipfsConfig : IpfsConfiguration.getDefault(constants);
 
         if (!constants) {
