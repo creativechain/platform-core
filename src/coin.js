@@ -401,6 +401,6 @@ class ZlotiCoin extends Coin {
 }
 
 if (module) {
-    module.exports = {Currency, FiatCurrency, CryptoCurrency, UnknowCurrency, Btc, Pln, Usd, Mxn, Eur, MonetaryFormat, Coin,
+    module.exports = {Currency, FiatCurrency, CryptoCurrency, UnknownCurrency, Btc, Pln, Usd, Mxn, Eur, MonetaryFormat, Coin,
         CryptoCoin, BitCoin, CreativeCoin, EurCoin, DollarCoin, PesoCoin, ZlotiCoin}
 }
