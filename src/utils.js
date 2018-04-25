@@ -7,6 +7,7 @@ const Error = require('./error');
 let filesize = require('file-size');
 let path = require('path');
 let upath = require('upath');
+let request = require('request');
 
 class OS {
 
