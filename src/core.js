@@ -36,6 +36,9 @@ class Core extends EventEmitter {
         if (!this.txFeeKb) {
             throw Error.UNDEFINED_TX_FEE_RATE;
         }
+
+        //Set network for trantor-js
+        ContentData.NETWORK = coreConfig.network;
     }
 
     __checkBinariesExists(callback) {
