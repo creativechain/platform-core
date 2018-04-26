@@ -159,7 +159,6 @@ class Core extends EventEmitter {
             });
         }, 500);
 
-
         this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
             console.log('IPFS ready!');
             let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
