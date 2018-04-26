@@ -127,8 +127,8 @@ class Core extends EventEmitter {
         let inits = 3;
 
         let callCallback = function () {
-            console.log('Inits to perform:', inits);
             inits--;
+            console.log('Inits to perform:', inits);
             if (inits === 0) {
                 if (callback) {
                     callback();
@@ -161,6 +161,7 @@ class Core extends EventEmitter {
             console.log('IPFS ready!');
             let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
             that.ipfsrunner.send('connect', swarm, function (err) {
+                console.error('failed to connect swarm', err);
                 if (err) {
                     console.error(err);
                 } else {
