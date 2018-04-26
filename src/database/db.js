@@ -91,7 +91,7 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
                     let file = migrationDir + version + '.sql';
                     if (File.exist(file)) {
                         let queries = File.read(file);
-                        that.run(queries, function (err) {
+                        that.exec(queries, function (err) {
                             if (!err) {
                                 performMigration(++version);
                             } else {
