@@ -536,7 +536,7 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
 
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
@@ -564,7 +564,7 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
 IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callback) {
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -591,7 +591,7 @@ IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callbac
 IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -620,7 +620,7 @@ IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
 IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, callback) {
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
@@ -649,7 +649,7 @@ IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddr
     this.select("SELECT f.follower_address, n.* FROM Following f " +
         "LEFT JOIN (SELECT m.*,  " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -675,7 +675,7 @@ IndexDB.prototype.getMediaByFollowedAddress = function(followedAddress, callback
     this.select("SELECT f.followed_address, n.* FROM Following f " +
         "LEFT JOIN (SELECT m.*,  " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -715,7 +715,7 @@ IndexDB.prototype.getMediaAddressByAuthor = function(authorAddress, callback) {
 IndexDB.prototype.getPlatformUpdates = function(updater, os, userAddress, callback) {
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -912,7 +912,7 @@ IndexDB.prototype.getContentTags = function(tags, callback) {
 IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
     let query = "SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Unlike' ul WHERE m.address = ul.content_id) AS unlikes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
