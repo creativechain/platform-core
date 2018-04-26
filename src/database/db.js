@@ -150,7 +150,7 @@ IndexDB.prototype.getLastExploredBlock = function(callback) {
  * @param callback
  */
 IndexDB.prototype.addAuthor = function(user, tx, date, callback) {
-    let insertUser = this.database.prepare('REPLACE INTO Author VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    let insertUser = this.prepare('REPLACE INTO Author VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     let that = this;
     this.getAuthor(user.address, user.address, function (err, result) {
 
@@ -177,7 +177,7 @@ IndexDB.prototype.addAuthor = function(user, tx, date, callback) {
  * @param {Array} tags
  */
 IndexDB.prototype.insertUserTags = function(userAddress, tags) {
-    let insertTag = this.database.prepare('REPLACE INTO UserTags VALUES (?, ?)');
+    let insertTag = this.prepare('REPLACE INTO UserTags VALUES (?, ?)');
     if (tags) {
         tags.forEach(function (tag) {
             tag = tag.toLowerCase();
@@ -211,7 +211,7 @@ IndexDB.prototype.getAuthor = function(address, userAddress, callback) {
  * @param callback
  */
 IndexDB.prototype.insertTorrent = function(ipfsCid, file, callback) {
-    let insertTorrent = this.database.prepare('REPLACE INTO Torrent VALUES (?, ?, ?)');
+    let insertTorrent = this.prepare('REPLACE INTO Torrent VALUES (?, ?, ?)');
     insertTorrent.run(ipfsCid.infoHash, ipfsCid.CID, file);
     if (callback) {
         callback();
@@ -227,7 +227,7 @@ IndexDB.prototype.insertTorrent = function(ipfsCid, file, callback) {
  * @param callback
  */
 IndexDB.prototype.insertNotification = function(author, type, resource, date, callback) {
-    let inserNotification = this.database.prepare('INSERT INTO Notification VALUES (?, ?, ?, ?, ?)');
+    let inserNotification = this.prepare('INSERT INTO Notification VALUES (?, ?, ?, ?, ?)');
     inserNotification.run(author, type, resource, date, 0);
     if (callback) {
         callback();
@@ -284,7 +284,7 @@ IndexDB.prototype.getTorrent = function(ipfsCid, callback) {
  * @param callback
  */
 IndexDB.prototype.addComment = function(comment, tx, date, callback) {
-    let insertComment = this.database.prepare('REPLACE INTO Comment VALUES (?, ?, ?, ?, ?, ?)');
+    let insertComment = this.prepare('REPLACE INTO Comment VALUES (?, ?, ?, ?, ?, ?)');
     insertComment.run(tx.hash, comment.version, comment.author, comment.contentAddress, comment.comment, date);
     if (callback) {
         callback();
@@ -325,7 +325,7 @@ IndexDB.prototype.getUserComments = function(userAddress, callback) {
  * @param callback
  */
 IndexDB.prototype.addFollowing = function(following, tx, date, callback) {
-    let insertFollowing = this.database.prepare('REPLACE INTO Following VALUES (?, ?, ?, ?, ?, ?)');
+    let insertFollowing = this.prepare('REPLACE INTO Following VALUES (?, ?, ?, ?, ?, ?)');
     insertFollowing.run(tx.hash, following.version, date, following.followerAddress, following.followedAddress, following.type);
     if (callback) {
         callback();
@@ -420,7 +420,7 @@ IndexDB.prototype.getBlocked = function(author, resource, callback) {
  * @param callback
  */
 IndexDB.prototype.addLike = function(like, tx, callback) {
-    let insertLike = this.database.prepare('REPLACE INTO Like VALUES (?, ?, ?, ?)');
+    let insertLike = this.prepare('REPLACE INTO Like VALUES (?, ?, ?, ?)');
     insertLike.run(tx.hash, like.version, like.author, like.contentAddress);
     if (callback) {
         callback();
@@ -434,7 +434,7 @@ IndexDB.prototype.addLike = function(like, tx, callback) {
  * @param callback
  */
 IndexDB.prototype.addUnlike = function(unlike, tx, callback) {
-    let insertUnlike = this.database.prepare('REPLACE INTO Unlike VALUES (?, ?, ?, ?)');
+    let insertUnlike = this.prepare('REPLACE INTO Unlike VALUES (?, ?, ?, ?)');
     insertUnlike.run(tx.hash, unlike.version, unlike.author, unlike.contentAddress);
 
     if (callback) {
@@ -449,7 +449,7 @@ IndexDB.prototype.addUnlike = function(unlike, tx, callback) {
  * @param callback
  */
 IndexDB.prototype.addPayment = function(payment, tx, callback) {
-    let insertPayment = this.database.prepare('REPLACE INTO Payment VALUES (?, ?, ?, ?, ?)');
+    let insertPayment = this.prepare('REPLACE INTO Payment VALUES (?, ?, ?, ?, ?)');
     insertPayment.run(tx.hash, payment.version, payment.author, payment.contentAddress, payment.amount);
     if (callback) {
         callback();
@@ -473,7 +473,7 @@ IndexDB.prototype.getContentLikes = function(contentId, callback) {
  * @param callback
  */
 IndexDB.prototype.addMedia = function(media, tx, date, callback) {
-    let insertMedia = this.database.prepare('REPLACE INTO Media VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    let insertMedia = this.prepare('REPLACE INTO Media VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     insertMedia.run(tx.hash, media.version, date, media.userAddress, media.contentAddress, media.type, media.title,
         media.description, media.contentType, media.license, JSON.stringify(media.tags), media.price, media.publicContent,
         media.privateContent, media.hash, media.publicFileSize, media.privateFileSize);
@@ -511,7 +511,7 @@ IndexDB.prototype.removeMediaByAuthor = function(authorAddress) {
  * @param {Array} tags
  */
 IndexDB.prototype.insertMediaTags = function(mediaAddress, tags) {
-    let insertTag = this.database.prepare('REPLACE INTO MediaTags VALUES (?, ?)');
+    let insertTag = this.prepare('REPLACE INTO MediaTags VALUES (?, ?)');
     if (tags) {
         tags.forEach(function (tag) {
             tag = tag.toLowerCase();
@@ -777,7 +777,7 @@ IndexDB.prototype.removeAddress = function(address, callback) {
  * @param callback
  */
 IndexDB.prototype.insertAddressBook = function(address, label, callback) {
-    let insertContact = this.database.prepare('REPLACE INTO AddressBook VALUES (?, ?)');
+    let insertContact = this.prepare('REPLACE INTO AddressBook VALUES (?, ?)');
     insertContact.run(address, label);
     if (callback) {
         callback();
@@ -830,7 +830,7 @@ IndexDB.prototype.getAddressBook = function(callback) {
  * @param callback
  */
 IndexDB.prototype.insertPaymentRequest = function(address, amount, creationDate, label, message, callback) {
-    let insertPaymentReq = this.database.prepare('REPLACE INTO PaymentRequest VALUES (?, ?, ?, ?, ?)');
+    let insertPaymentReq = this.prepare('REPLACE INTO PaymentRequest VALUES (?, ?, ?, ?, ?)');
     insertPaymentReq.run(address, amount, creationDate, label, message);
     if (callback) {
         callback();
@@ -863,7 +863,7 @@ IndexDB.prototype.getAllPaymentRequest = function(callback) {
  */
 IndexDB.prototype.putTorrent = function(hash, CID, path, file, callback) {
     //console.log('Inserting torrent on db', hash, CID, path, file);
-    let insertTorrent = this.database.prepare('REPLACE INTO Torrent VALUES (?, ?, ?, ?)');
+    let insertTorrent = this.prepare('REPLACE INTO Torrent VALUES (?, ?, ?, ?)');
     insertTorrent.run(hash, CID, path, file);
     if (callback) {
         callback();
