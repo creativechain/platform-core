@@ -78,12 +78,14 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
     if (migrationDir && File.exist(migrationDir)) {
 
         let callCallback = function (err) {
+            console.log('Calling callback');
             if (callback) {
                 callback(err);
             }
         };
 
         this.select('PRAGMA user_version;', function (err, result) {
+            console.log('DB PRAGMA', err, result);
             if (err) {
                 callCallback(err);
             } else {
@@ -91,7 +93,9 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
                     let file = migrationDir + version + '.sql';
                     if (File.exist(file)) {
                         let queries = File.read(file);
+                        console.log('DB EXECUTION MIGRATION', file);
                         that.exec(queries, function (err) {
+                            console.log('DB MIGRATION EXECUTED');
                             if (!err) {
                                 performMigration(++version);
                             } else {
@@ -106,7 +110,9 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
                 let version = parseInt(result[0].user_version);
                 if (version === 0) {
                     let sqlCreationQueries = File.read(that.creationFile);
+                    console.log('DB CREATE');
                     that.exec(sqlCreationQueries, function (err) {
+                        console.log('DB CREATION');
                         if (err) {
                             callCallback(err);
                         } else {
