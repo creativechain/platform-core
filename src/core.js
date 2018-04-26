@@ -150,12 +150,25 @@ class Core extends EventEmitter {
         });
 
         File.mkpath(this.constants.DATABASE_FILE, true);
-        this.dbrunner.start(this.constants.DATABASE_FILE, this.constants.DATABASE_CREATION_FILE);
 
-        this.dbrunner.send('migrate', this.constants.DBMIGRATIONS_DIR, function (err) {
-            console.log('Database initialized', err);
-            callCallback();
-        });
+        let startDb = function () {
+            that.dbrunner.start(that.constants.DATABASE_FILE, that.constants.DATABASE_CREATION_FILE);
+
+            that.dbrunner.send('migrate', that.constants.DBMIGRATIONS_DIR, function (err) {
+                console.log('Database initialized', err);
+                callCallback();
+            });
+        };
+
+        if (!File.exist()) {
+            that.on('core.bootstrap', function (ready) {
+                startDb();
+            });
+            this.emit('core.bootstrap.download');
+        } else {
+            startDb();
+        }
+
 
         this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
             console.log('IPFS ready!');
