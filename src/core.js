@@ -160,7 +160,7 @@ class Core extends EventEmitter {
             });
         };
 
-        if (!File.exist()) {
+        if (!File.exist(this.constants.DATABASE_FILE)) {
             that.on('core.bootstrap', function (ready) {
                 startDb();
             });
