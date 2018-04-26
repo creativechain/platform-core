@@ -259,7 +259,7 @@ IndexDB.prototype.getNotificationsByAuthor = function(address, callback, limit =
  * @param callback
  * @param {number} limit
  */
-IndexDB.prototype.getUnviewedNotifications = function(callback, limit = 50) {
+IndexDB.prototype.getUnviewedNotifications = function(limit, callback) {
     this.select('SELECT * FROM Notification, Author WHERE viewed = 0 AND author = address ORDER BY on_date DESC LIMIT ' + limit + ';', callback);
 };
 
