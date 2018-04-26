@@ -419,7 +419,7 @@ class Core extends EventEmitter {
      */
     getSpendables(minConfirmations = 0, callback) {
         let that = this;
-        this.client.listUnspent(minConfirmations, function (err, result) {
+        this.rpcWallet.listUnspent(minConfirmations, function (err, result) {
             //that.log('unspents', result);
             let spendables = Spendable.parseJson(result);
             callback(err, spendables);
@@ -479,7 +479,7 @@ class Core extends EventEmitter {
      * @param callback
      */
     getRawTransaction(txId, callback) {
-        this.client.getRawTransaction(txId, callback);
+        this.rpcWallet.getRawTransaction(txId, callback);
     }
 
     /**
@@ -487,7 +487,7 @@ class Core extends EventEmitter {
      * @param callback
      */
     getChangeAddress(callback) {
-        this.client.getRawChangeAddress(callback);
+        this.rpcWallet.getRawChangeAddress(callback);
     }
 
     /**
@@ -497,7 +497,7 @@ class Core extends EventEmitter {
      */
     sendRawTransaction(rawTx, callback) {
         let that = this;
-        this.client.sendRawTransaction(rawTx, function (err, result) {
+        this.rpcWallet.sendRawTransaction(rawTx, function (err, result) {
             //that.log('send tx', result);
             that.emit('core.transaction.send', DecodedTransaction.fromHex(rawTx));
             if (callback) {
@@ -513,7 +513,7 @@ class Core extends EventEmitter {
      * @param callback
      */
     decryptWallet(passphrase, timeout, callback) {
-        this.client.walletPassPhrase(passphrase, timeout, callback);
+        this.rpcWallet.walletPassPhrase(passphrase, timeout, callback);
     }
 
     /**
