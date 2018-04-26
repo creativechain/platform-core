@@ -412,6 +412,6 @@ class Spendable {
 
 if (module) {
     module.exports = {
-        TxInput, TxOutput, DecodedTransaction, TransactionBuilder
+        TxInput, TxOutput, DecodedTransaction, TransactionBuilder, Spendable
     }
 }
