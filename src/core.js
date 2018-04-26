@@ -585,7 +585,7 @@ class Core extends EventEmitter {
 
                     let txBuilder = new TransactionBuilder(that.constants.NETWORK, that.txFeeKb, dataSize);
 
-                    that.client.getRawChangeAddress(function (err, result) {
+                    that.rpcWallet.getRawChangeAddress(function (err, result) {
                         if (err) {
                             that.error(err);
                         } else {
