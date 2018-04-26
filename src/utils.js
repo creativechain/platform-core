@@ -188,7 +188,7 @@ class File {
      */
     static cp(source, dest) {
         console.log('Copying', source, dest);
-        fs.copyFileSync(source, dest);
+        fs.createReadStream(source).pipe(fs.createWriteStream(dest));
     }
 
     /**
