@@ -355,6 +355,7 @@ class Core extends EventEmitter {
             startBlock = startBlock < that.constants.START_BLOCK ? that.constants.START_BLOCK : startBlock;
             console.log('Start exploration at block', startBlock);
 
+            that.dbrunner.send('insertLastExploredBlock', --startBlock);
             that.rpcWallet.getBlockCount(function (err, result) {
                 if (!err) {
                     console.log('Total blocks', result);

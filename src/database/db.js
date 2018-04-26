@@ -127,7 +127,7 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
  * @param callback
  */
 IndexDB.prototype.insertLastExploredBlock = function(lastExploredBlock, callback) {
-    let insertPlatform = this.prepare('INSERT INTO Platform VALUES (?, ?)');
+    let insertPlatform = this.prepare('REPLACE INTO Platform VALUES (?, ?)');
     insertPlatform.run('', lastExploredBlock);
     if (callback) {
         callback();
