@@ -149,8 +149,8 @@ class Core extends EventEmitter {
         File.mkpath(this.constants.DATABASE_FILE, true);
         this.dbrunner.start(this.constants.DATABASE_FILE, this.constants.DATABASE_CREATION_FILE);
 
-        this.dbrunner.send('migrate', this.constants.DBMIGRATIONS_DIR, function () {
-            console.log('Database initialized');
+        this.dbrunner.send('migrate', this.constants.DBMIGRATIONS_DIR, function (err) {
+            console.log('Database initialized', err);
             callCallback();
         });
 
