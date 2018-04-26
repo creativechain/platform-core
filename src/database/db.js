@@ -947,7 +947,7 @@ IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
  * @param callback
  */
 IndexDB.prototype.getAuthorsByTags = function(tags, userAddress, callback) {
-    if (!tags.isEmpty()) {
+    if (tags.length > 0) {
 
         let query = 'SELECT a.*, ' +
             '(SELECT t.file FROM Torrent t WHERE t.magnet = a.avatar) AS avatarFile ' +
