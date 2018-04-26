@@ -240,7 +240,7 @@ IndexDB.prototype.insertNotification = function(author, type, resource, date, ca
  * @param callback
  * @param {number} limit
  */
-IndexDB.prototype.getNotifications = function(callback, limit = 50) {
+IndexDB.prototype.getNotifications = function(limit, callback) {
     this.select("SELECT * FROM Notification, Author WHERE author = address ORDER BY on_date DESC LIMIT " + limit + ";", callback);
 };
 
