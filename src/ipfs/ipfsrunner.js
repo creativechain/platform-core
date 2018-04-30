@@ -1,4 +1,5 @@
 let IpfsClient = require('./ipfsclient');
+let fs = require('fs');
 
 let ipfsClient = null;
 
