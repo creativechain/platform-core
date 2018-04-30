@@ -23,11 +23,11 @@ function IndexDB (databaseFile, creationFile, logFile) {
         log4js.configure({
             appenders: [
                 { type: 'console' },
-                { type: 'file', filename: logFile, category: 'indexdb' }
+                { type: 'file', filename: logFile, category: 'cheese' }
             ]
         });
 
-        db.logger = log4js.getLogger('indexdb');
+        db.logger = log4js.getLogger('cheese');
     } else {
         throw Error.UNDEFINED_LOG_FILE;
     }

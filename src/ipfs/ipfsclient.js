@@ -26,11 +26,11 @@ class IpfsClient extends IPFS {
             log4js.configure({
                 appenders: [
                     { type: 'console' },
-                    { type: 'file', filename: config.logFile, category: 'ipfs' }
+                    { type: 'file', filename: config.logFile, category: 'cheese' }
                 ]
             });
 
-            this.logger = log4js.getLogger('ipfs');
+            this.logger = log4js.getLogger('cheese');
         } else {
             throw  Error.UNDEFINED_LOG_FILE;
         }
