@@ -23,8 +23,8 @@ class Core extends EventEmitter {
         this.txContentAmount = txContentAmount;
         this.txFeeKb = txFeeKb;
         this.constants = coreConfig.constants;
-        this.dbrunner = new Runner(__dirname + '/database/dbrunner.js', 'db');
-        this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs');
+        this.dbrunner = new Runner(__dirname + '/database/dbrunner.js', 'db', coreConfig.constants.LOG_DIR + 'db.log');
+        this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs', coreConfig.constants.LOG_DIR + 'ipfs.log');
         this.rpcWallet = RPCWallet.buildClient(coreConfig.rpcConfig);
         this.isInitializing = false;
         this.isExploring = false;
