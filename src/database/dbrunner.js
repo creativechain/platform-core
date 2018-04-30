@@ -1,10 +1,16 @@
 let IndexDB = require('./db');
+let fs = require('fs');
 
 let db = null;
 
 function bindMethod(data) {
     if (data.method === 'start') {
         db = new IndexDB(data.arguments[0], data.arguments[1]);
+        if (data.arguments.length > 2) {
+            let logFile = data.arguments[2];
+            let log = fs.createWriteStream(logFile);
+            process.stdout.write = process.stderr.write = log.write.bind(log);
+        }
     } else {
         let method = db[data.method];
         let response = {

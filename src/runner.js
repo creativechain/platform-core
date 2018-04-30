@@ -26,8 +26,7 @@ class Runner extends EventEmitter {
         let that = this;
         this.fork = fork(this.script);
         if (this.logFile) {
-            let log = fs.createWriteStream(this.logFile);
-            this.fork.stdout.write = this.fork.stderr.write = log.write.bind(log);
+            args.push(this.logFile);
         }
         this.fork.on('message', (data) => {
             let responseArgs = data.response;

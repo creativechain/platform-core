@@ -5,6 +5,12 @@ let ipfsClient = null;
 function bindMethod(data) {
     if (data.method === 'start') {
         ipfsClient = new IpfsClient(data.arguments[0]);
+        if (data.arguments.length > 1) {
+            let logFile = data.arguments[1];
+            let log = fs.createWriteStream(logFile);
+            process.stdout.write = process.stderr.write = log.write.bind(log);
+        }
+
         let response = {
             event: 'ipfs.' + data.id,
             response: ['ready']
