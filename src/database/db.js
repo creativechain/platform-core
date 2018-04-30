@@ -2,15 +2,15 @@ let Database = require('better-sqlite3');
 let {File} = require('../utils');
 let Error = require('../error');
 let {Constants} = require('trantor-js');
-
+let log4js = require('log4js');
 /**
  *
  * @param {string} databaseFile
  * @param {string} creationFile
- * @param {boolean} debug
+ * @param {string} logFile
  * @constructor
  */
-function IndexDB (databaseFile, creationFile, debug = true) {
+function IndexDB (databaseFile, creationFile, logFile) {
 
     if (!creationFile || !File.exist(creationFile)) {
         throw Error.NO_DB_CREATION_FILE
@@ -18,7 +18,19 @@ function IndexDB (databaseFile, creationFile, debug = true) {
 
     let db = new Database(databaseFile);
     db.creationFile = creationFile;
-    db.debug = debug;
+
+    if (logFile) {
+        log4js.configure({
+            appenders: [
+                { type: 'console' },
+                { type: 'file', filename: logFile, category: 'indexdb' }
+            ]
+        });
+
+        db.logger = log4js.getLogger('indexdb');
+    } else {
+        throw Error.UNDEFINED_LOG_FILE;
+    }
 
     return db;
 }
@@ -78,14 +90,14 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
     if (migrationDir && File.exist(migrationDir)) {
 
         let callCallback = function (err) {
-            console.log('Calling callback');
+            that.logger.info('Calling callback');
             if (callback) {
                 callback(err);
             }
         };
 
         this.select('PRAGMA user_version;', function (err, result) {
-            console.log('DB PRAGMA', err, result);
+            that.logger.debug('DB PRAGMA', err, result);
             if (err) {
                 callCallback(err);
             } else {

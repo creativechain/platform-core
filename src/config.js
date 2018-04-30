@@ -14,7 +14,7 @@ class Configuration {
     }
 }
 
-class RPCConfiguration extends Configuration{
+class RPCConfiguration extends Configuration {
 
     /**
      *
@@ -172,8 +172,19 @@ class IpfsConfiguration extends Configuration{
         this.ipfsDir = ipfsDir ? ipfsDir : this.constants.IPFS_DIR;
         this.dataDir = dataDir ? dataDir : this.constants.DATA_DIR;
         this.shareUrls = Array.isArray(ipfsShareUrls) ? ipfsShareUrls : [];
+
+        if (!File.exist(constants.LOG_DIR)) {
+            File.mkpath(constants.LOG_DIR);
+        }
+
+        this.logFile = constants.LOG_DIR + 'ipfs.log';
     }
 
+    /**
+     *
+     * @param constants
+     * @return {IpfsConfiguration}
+     */
     static getDefault(constants) {
         return new IpfsConfiguration(constants);
     }

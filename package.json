@@ -32,6 +32,7 @@
     "coinselect": "github:creativechain/coinselect",
     "file-size": "^1.0.0",
     "ipfs": "^0.28.2",
+    "log4js": "^2.5.3",
     "lzma": "^2.3.2",
     "path": "^0.12.7",
     "sha256": "^0.2.0",
