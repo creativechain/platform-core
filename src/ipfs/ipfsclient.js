@@ -1,7 +1,6 @@
 const IPFS = require('ipfs');
 const Error = require('../error');
 const {File} = require('../utils');
-const log4js = require('log4js');
 
 class IpfsClient extends IPFS {
 
@@ -20,19 +19,6 @@ class IpfsClient extends IPFS {
             })
         } else {
             super();
-        }
-
-        if (config.logFile) {
-            log4js.configure({
-                appenders: [
-                    { type: 'console' },
-                    { type: 'file', filename: config.logFile, category: 'cheese' }
-                ]
-            });
-
-            this.logger = log4js.getLogger('cheese');
-        } else {
-            throw  Error.UNDEFINED_LOG_FILE;
         }
 
         this.configuration = config;
@@ -96,7 +82,7 @@ class IpfsClient extends IPFS {
                         url = url + ipfsData.hash;
                         options.url = url;
                         request(options, function (error, response, body) {
-                            that.logger.debug('IPFS Shared on', url)
+                            console.log('IPFS Shared on', url)
                         });
                     });
 
@@ -132,7 +118,7 @@ class IpfsClient extends IPFS {
                 if (err) {
                     console.error(err);
                 } else {
-                    that.logger.debug('File downloaded!', cid, files);
+                    console.log('File downloaded!', cid, files);
 
                     let data = null;
                     for (let x = 0; x < files.length; x++) {
@@ -147,8 +133,8 @@ class IpfsClient extends IPFS {
                         data = files[0];
                     }
 
+                    console.log('Writing', data);
                     let file = desPath + name;
-                    that.logger.info('Saving', file);
                     console.log(file);
                     File.write(file, data.content, 'binary');
 
@@ -167,7 +153,7 @@ class IpfsClient extends IPFS {
     close() {
         let that = this;
         this.stop(function () {
-            that.logger.debug('IPFS node stopped');
+            console.log('IPFS node stopped!');
         });
     }
 }

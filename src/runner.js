@@ -1,6 +1,7 @@
 let {fork} = require('child_process');
 let EventEmitter = require('events');
-let {Utils} = require('./utils');
+let {Utils, File} = require('./utils');
+let fs = require('fs');
 
 class Runner extends EventEmitter {
 
@@ -8,11 +9,13 @@ class Runner extends EventEmitter {
      *
      * @param {string} script
      * @param {string} prefix
+     * @param {string} logFile
      */
-    constructor(script, prefix) {
+    constructor(script, prefix, logFile) {
         super();
         this.script = script;
         this.prefix = prefix;
+        this.logFile = logFile;
     }
 
     /**
@@ -22,6 +25,10 @@ class Runner extends EventEmitter {
     start(...args) {
         let that = this;
         this.fork = fork(this.script);
+        if (this.logFile) {
+            let log = fs.createWriteStream(this.logFile);
+            this.fork.stdout.write = this.fork.stderr.write = log.write.bind(log);
+        }
         this.fork.on('message', (data) => {
             let responseArgs = data.response;
             responseArgs.unshift(data.event);
