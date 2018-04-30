@@ -25,9 +25,6 @@ class Runner extends EventEmitter {
     start(...args) {
         let that = this;
         this.fork = fork(this.script);
-        if (this.logFile) {
-            args.push(this.logFile);
-        }
         this.fork.on('message', (data) => {
             let responseArgs = data.response;
             responseArgs.unshift(data.event);
@@ -63,6 +60,10 @@ class Runner extends EventEmitter {
 
         if (callback) {
             this.on(this.prefix + '.' + id, callback)
+        }
+
+        if (method === 'start' && this.logFile) {
+            params.push(this.logFile);
         }
 
         this.fork.send({id: id, method: method, arguments: params});
