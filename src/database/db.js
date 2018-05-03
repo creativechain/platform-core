@@ -45,6 +45,7 @@ IndexDB.prototype.select = function(query, callback) {
             callback(null, rows);
         }
     } catch (e) {
+        console.error(e);
         if (callback) {
             callback(e.stack.toString(), null);
         }
@@ -64,11 +65,16 @@ IndexDB.prototype.run = function(query, callback) {
         let stmnt = this.prepare(query);
         stmnt.run();
     } catch (e) {
+        console.error(e);
         err = e;
     }
 
-    if (callback && err) {
-        callback(err.stack.toString(), null);
+    if (callback) {
+        if (err) {
+            callback(err.stack.toString(), null);
+        } else {
+            callback(null, null)
+        }
     }
 };
 
@@ -113,17 +119,35 @@ IndexDB.prototype.migrate = function (migrationDir, callback) {
     }
 };
 
+IndexDB.prototype.tryRun = function(runCall, callback) {
+    let err = null;
+    try {
+        runCall();
+    } catch (e) {
+        console.error(e);
+        err = e;
+    }
+
+    if (callback) {
+        if (err) {
+            callback(err.stack.toString());
+        } else {
+            callback(null, null);
+        }
+    }
+}
+
 /**
  *
  * @param lastExploredBlock
  * @param callback
  */
 IndexDB.prototype.insertLastExploredBlock = function(lastExploredBlock, callback) {
-    let insertPlatform = this.prepare('REPLACE INTO Platform VALUES (?, ?)');
-    insertPlatform.run('', lastExploredBlock);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertPlatform = that.prepare('REPLACE INTO Platform VALUES (?, ?)');
+        insertPlatform.run('', lastExploredBlock);
+    }, callback);
 };
 
 IndexDB.prototype.updateLastExploredBlock = function(lastExploredBlock, callback) {
@@ -142,24 +166,27 @@ IndexDB.prototype.getLastExploredBlock = function(callback) {
  * @param callback
  */
 IndexDB.prototype.addAuthor = function(user, tx, date, callback) {
-    let insertUser = this.prepare('REPLACE INTO Author VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     let that = this;
-    this.getAuthor(user.address, user.address, function (err, result) {
+    this.tryRun(function () {
+        let insertUser = that.prepare('REPLACE INTO Author VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        this.getAuthor(user.address, user.address, function (err, result) {
 
-        if (err) {
-            console.error(err);
-        } else if (result.length > 0) {
-            date = result[0].creation_date;
-        }
+            if (err) {
+                console.error(err);
+            } else if (result.length > 0) {
+                date = result[0].creation_date;
+            }
 
-        insertUser.run(tx.hash, user.version, date, user.nick, user.address, user.email, user.web, user.description, user.avatar, JSON.stringify(user.tags));
+            insertUser.run(tx.hash, user.version, date, user.nick, user.address, user.email, user.web, user.description, user.avatar, JSON.stringify(user.tags));
 
-        that.insertUserTags(user.address, user.tags);
+            that.insertUserTags(user.address, user.tags);
 
-        if (callback) {
-            callback();
-        }
-    });
+            if (callback) {
+                callback();
+            }
+        });
+    }, callback);
+
 };
 
 /**
@@ -169,13 +196,17 @@ IndexDB.prototype.addAuthor = function(user, tx, date, callback) {
  * @param {Array} tags
  */
 IndexDB.prototype.insertUserTags = function(userAddress, tags) {
-    let insertTag = this.prepare('REPLACE INTO UserTags VALUES (?, ?)');
-    if (tags) {
-        tags.forEach(function (tag) {
-            tag = tag.toLowerCase();
-            insertTag.run(tag, userAddress);
-        })
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertTag = that.prepare('REPLACE INTO UserTags VALUES (?, ?)');
+        if (tags) {
+            tags.forEach(function (tag) {
+                tag = tag.toLowerCase();
+                insertTag.run(tag, userAddress);
+            })
+        }
+    });
+
 
 };
 
@@ -203,11 +234,15 @@ IndexDB.prototype.getAuthor = function(address, userAddress, callback) {
  * @param callback
  */
 IndexDB.prototype.insertTorrent = function(ipfsCid, file, callback) {
-    let insertTorrent = this.prepare('REPLACE INTO Torrent VALUES (?, ?, ?)');
-    insertTorrent.run(ipfsCid.infoHash, ipfsCid.CID, file);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertTorrent = that.prepare('REPLACE INTO Torrent VALUES (?, ?, ?)');
+        insertTorrent.run(ipfsCid.infoHash, ipfsCid.CID, file);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -219,11 +254,15 @@ IndexDB.prototype.insertTorrent = function(ipfsCid, file, callback) {
  * @param callback
  */
 IndexDB.prototype.insertNotification = function(author, type, resource, date, callback) {
-    let inserNotification = this.prepare('INSERT INTO Notification VALUES (?, ?, ?, ?, ?)');
-    inserNotification.run(author, type, resource, date, 0);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let inserNotification = that.prepare('INSERT INTO Notification VALUES (?, ?, ?, ?, ?)');
+        inserNotification.run(author, type, resource, date, 0);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 
@@ -276,11 +315,15 @@ IndexDB.prototype.getTorrent = function(ipfsCid, callback) {
  * @param callback
  */
 IndexDB.prototype.addComment = function(comment, tx, date, callback) {
-    let insertComment = this.prepare('REPLACE INTO Comment VALUES (?, ?, ?, ?, ?, ?)');
-    insertComment.run(tx.hash, comment.version, comment.author, comment.contentAddress, comment.comment, date);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertComment = that.prepare('REPLACE INTO Comment VALUES (?, ?, ?, ?, ?, ?)');
+        insertComment.run(tx.hash, comment.version, comment.author, comment.contentAddress, comment.comment, date);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -317,11 +360,15 @@ IndexDB.prototype.getUserComments = function(userAddress, callback) {
  * @param callback
  */
 IndexDB.prototype.addFollowing = function(following, tx, date, callback) {
-    let insertFollowing = this.prepare('REPLACE INTO Following VALUES (?, ?, ?, ?, ?, ?)');
-    insertFollowing.run(tx.hash, following.version, date, following.followerAddress, following.followedAddress, following.type);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertFollowing = that.prepare('REPLACE INTO Following VALUES (?, ?, ?, ?, ?, ?)');
+        insertFollowing.run(tx.hash, following.version, date, following.followerAddress, following.followedAddress, following.type);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -412,11 +459,15 @@ IndexDB.prototype.getBlocked = function(author, resource, callback) {
  * @param callback
  */
 IndexDB.prototype.addLike = function(like, tx, callback) {
-    let insertLike = this.prepare('REPLACE INTO Like VALUES (?, ?, ?, ?)');
-    insertLike.run(tx.hash, like.version, like.author, like.contentAddress);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertLike = that.prepare('REPLACE INTO Like VALUES (?, ?, ?, ?)');
+        insertLike.run(tx.hash, like.version, like.author, like.contentAddress);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -426,12 +477,16 @@ IndexDB.prototype.addLike = function(like, tx, callback) {
  * @param callback
  */
 IndexDB.prototype.addUnlike = function(unlike, tx, callback) {
-    let insertUnlike = this.prepare('REPLACE INTO Unlike VALUES (?, ?, ?, ?)');
-    insertUnlike.run(tx.hash, unlike.version, unlike.author, unlike.contentAddress);
+    let that = this;
+    this.tryRun(function () {
+        let insertUnlike = that.prepare('REPLACE INTO Unlike VALUES (?, ?, ?, ?)');
+        insertUnlike.run(tx.hash, unlike.version, unlike.author, unlike.contentAddress);
 
-    if (callback) {
-        callback();
-    }
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -441,11 +496,15 @@ IndexDB.prototype.addUnlike = function(unlike, tx, callback) {
  * @param callback
  */
 IndexDB.prototype.addPayment = function(payment, tx, callback) {
-    let insertPayment = this.prepare('REPLACE INTO Payment VALUES (?, ?, ?, ?, ?)');
-    insertPayment.run(tx.hash, payment.version, payment.author, payment.contentAddress, payment.amount);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertPayment = that.prepare('REPLACE INTO Payment VALUES (?, ?, ?, ?, ?)');
+        insertPayment.run(tx.hash, payment.version, payment.author, payment.contentAddress, payment.amount);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -465,15 +524,19 @@ IndexDB.prototype.getContentLikes = function(contentId, callback) {
  * @param callback
  */
 IndexDB.prototype.addMedia = function(media, tx, date, callback) {
-    let insertMedia = this.prepare('REPLACE INTO Media VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    insertMedia.run(tx.hash, media.version, date, media.userAddress, media.contentAddress, media.type, media.title,
-        media.description, media.contentType, media.license, JSON.stringify(media.tags), media.price, media.publicContent,
-        media.privateContent, media.hash, media.publicFileSize, media.privateFileSize);
+    let that = this;
+    this.tryRun(function () {
+        let insertMedia = that.prepare('REPLACE INTO Media VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        insertMedia.run(tx.hash, media.version, date, media.userAddress, media.contentAddress, media.type, media.title,
+            media.description, media.contentType, media.license, JSON.stringify(media.tags), media.price, media.publicContent,
+            media.privateContent, media.hash, media.publicFileSize, media.privateFileSize);
 
-    this.insertMediaTags(media.contentAddress, media.tags);
-    if (callback) {
-        callback();
-    }
+        that.insertMediaTags(media.contentAddress, media.tags);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 IndexDB.prototype.setMediaPrivateContent = function(contentAddress, privateContent) {
@@ -503,13 +566,17 @@ IndexDB.prototype.removeMediaByAuthor = function(authorAddress) {
  * @param {Array} tags
  */
 IndexDB.prototype.insertMediaTags = function(mediaAddress, tags) {
-    let insertTag = this.prepare('REPLACE INTO MediaTags VALUES (?, ?)');
-    if (tags) {
-        tags.forEach(function (tag) {
-            tag = tag.toLowerCase();
-            insertTag.run(tag, mediaAddress);
-        })
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertTag = that.prepare('REPLACE INTO MediaTags VALUES (?, ?)');
+        if (tags) {
+            tags.forEach(function (tag) {
+                tag = tag.toLowerCase();
+                insertTag.run(tag, mediaAddress);
+            })
+        }
+    });
+
 
 };
 
@@ -769,11 +836,15 @@ IndexDB.prototype.removeAddress = function(address, callback) {
  * @param callback
  */
 IndexDB.prototype.insertAddressBook = function(address, label, callback) {
-    let insertContact = this.prepare('REPLACE INTO AddressBook VALUES (?, ?)');
-    insertContact.run(address, label);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertContact = that.prepare('REPLACE INTO AddressBook VALUES (?, ?)');
+        insertContact.run(address, label);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -785,7 +856,7 @@ IndexDB.prototype.insertAddressBook = function(address, label, callback) {
 IndexDB.prototype.updateAddressBook = function(address, label, callback) {
     let that = this;
     let onCreate = function () {
-        that.insertAddressBook(address, label);
+        that.insertAddressBook(address, label, callback);
     };
 
     this.resolveAddressAndLabel(address, label, function (err, res) {
@@ -822,11 +893,15 @@ IndexDB.prototype.getAddressBook = function(callback) {
  * @param callback
  */
 IndexDB.prototype.insertPaymentRequest = function(address, amount, creationDate, label, message, callback) {
-    let insertPaymentReq = this.prepare('REPLACE INTO PaymentRequest VALUES (?, ?, ?, ?, ?)');
-    insertPaymentReq.run(address, amount, creationDate, label, message);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        let insertPaymentReq = that.prepare('REPLACE INTO PaymentRequest VALUES (?, ?, ?, ?, ?)');
+        insertPaymentReq.run(address, amount, creationDate, label, message);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 };
 
 /**
@@ -854,12 +929,16 @@ IndexDB.prototype.getAllPaymentRequest = function(callback) {
  * @param callback
  */
 IndexDB.prototype.putTorrent = function(hash, CID, path, file, callback) {
-    //console.log('Inserting torrent on db', hash, CID, path, file);
-    let insertTorrent = this.prepare('REPLACE INTO Torrent VALUES (?, ?, ?, ?)');
-    insertTorrent.run(hash, CID, path, file);
-    if (callback) {
-        callback();
-    }
+    let that = this;
+    this.tryRun(function () {
+        //console.log('Inserting torrent on db', hash, CID, path, file);
+        let insertTorrent = that.prepare('REPLACE INTO Torrent VALUES (?, ?, ?, ?)');
+        insertTorrent.run(hash, CID, path, file);
+        if (callback) {
+            callback();
+        }
+    }, callback);
+
 
 };
 
@@ -873,8 +952,8 @@ IndexDB.prototype.getAllTorrents = function(callback) {
  * @param callback
  */
 IndexDB.prototype.getContentTags = function(tags, callback) {
-    let matches = {};
     let that = this;
+    let matches = {};
     tags.forEach(function (tag, index) {
         that.select("SELECT * FROM ContentTags AS t WHERE t.tag LIKE '%" + tag + "%'", function (err, result) {
             if (result) {
