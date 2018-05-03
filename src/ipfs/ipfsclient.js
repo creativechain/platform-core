@@ -29,6 +29,7 @@ class IpfsClient extends IPFS {
             this.swarm.connect(swarm, function (err) {
                 if (callback) {
                     if (err) {
+                        console.error(err);
                         if (err.stack) {
                             callback(err.stack.toString());
                         } else {
@@ -40,6 +41,7 @@ class IpfsClient extends IPFS {
                 }
             })
         } else if (callback) {
+            console.error(Error.INVALID_SWARM);
             callback(Error.INVALID_SWARM);
         }
     }
@@ -58,6 +60,7 @@ class IpfsClient extends IPFS {
 
         this.files.add(fileBuffer, function (err, resultFiles) {
             if (err && callback) {
+                console.error(err);
                 callback(err.stack.toString(), null, null)
             } else if (resultFiles.length > 0) {
                 let ipfsData = resultFiles[0];
@@ -118,7 +121,7 @@ class IpfsClient extends IPFS {
                 if (err) {
                     console.error(err);
                 } else {
-                    console.log('File downloaded!', cid, files);
+                    console.log('File downloaded!', cid);
 
                     let data = null;
                     for (let x = 0; x < files.length; x++) {
@@ -133,9 +136,8 @@ class IpfsClient extends IPFS {
                         data = files[0];
                     }
 
-                    console.log('Writing', data);
                     let file = desPath + name;
-                    console.log(file);
+                    console.log('Writing', cid, file);
                     File.write(file, data.content, 'binary');
 
                     if (callback) {
