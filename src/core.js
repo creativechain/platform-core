@@ -27,8 +27,8 @@ class Core extends EventEmitter {
         this.constants = coreConfig.constants;
         this.dbrunner = new IndexDB(this.constants.DATABASE_FILE, this.constants.DATABASE_CREATION_FILE);
         //this.dbrunner = new Runner(__dirname + '/database/dbrunner.js', 'db', coreConfig.constants.LOG_DIR + 'db.log');
-        //this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs', coreConfig.constants.LOG_DIR + 'ipfs.log');
-        this.ipfsrunner = null; //new IpfsClient(coreConfig.ipfsConfig);
+        this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs', coreConfig.constants.LOG_DIR + 'ipfs.log');
+        //this.ipfsrunner = null; //new IpfsClient(coreConfig.ipfsConfig);
         this.rpcWallet = RPCWallet.buildClient(coreConfig.rpcConfig);
         this.isInitializing = false;
         this.isExploring = false;
@@ -171,7 +171,7 @@ class Core extends EventEmitter {
             startDb();
         }
 
-        this.ipfsrunner = new IpfsClient(this.configuration.ipfsConfig);
+/*        this.ipfsrunner = new IpfsClient(this.configuration.ipfsConfig);
         this.ipfsrunner.on('ready', function () {
             let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
             that.ipfsrunner.connect(swarm, function (err) {
@@ -181,19 +181,19 @@ class Core extends EventEmitter {
                     callCallback();
                 }
             })
-        })
+        })*/
 
-        /*        this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
-                    console.log('IPFS ready!');
-                    let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
-                    that.ipfsrunner.send('connect', swarm, function (err) {
-                        if (err) {
-                            console.error(err);
-                        } else {
-                            callCallback();
-                        }
-                    });
-                });*/
+        this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
+            console.log('IPFS ready!');
+            let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
+            that.ipfsrunner.send('connect', swarm, function (err) {
+                if (err) {
+                    console.error(err);
+                } else {
+                    callCallback();
+                }
+            });
+        });
 
     }
 
