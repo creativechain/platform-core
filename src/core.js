@@ -255,6 +255,14 @@ class Core extends EventEmitter {
         };
 
         let processBlockHash = function () {
+            let blockCountInterval = setInterval(function () {
+                that.rpcWallet.getBlockCount(function (err, result) {
+                    if (!err) {
+                        blockCount = parseInt(result);
+                    }
+                });
+            }, 30000);
+
             that.rpcWallet.getBlock(nextBlockHash, function (err, block) {
                 //that.log(block);
                 if (err) {
@@ -271,6 +279,7 @@ class Core extends EventEmitter {
                         }
 
                         that.isExploring = false;
+                        clearInterval(blockCountInterval);
                         that.dbrunner.updateLastExploredBlock(blockHeight, function (err, result) {
                             //console.log(err, result);
                         });
@@ -372,21 +381,11 @@ class Core extends EventEmitter {
             })
         };
 
-        this.dbrunner.getLastExploredBlock(function (err, result) {
-            if (!startBlock) {
-                if (err) {
-                    console.log(err);
-                } else if (result.length > 0) {
-                    result = result[0];
-                    startBlock = result.lastExploredBlock;
-                    startBlock++;
-                }
-            }
 
-            startBlock = startBlock < that.constants.START_BLOCK ? that.constants.START_BLOCK : startBlock;
+        let startExploration = function (blockHeight) {
+            startBlock = blockHeight < that.constants.START_BLOCK ? that.constants.START_BLOCK : blockHeight;
             console.log('Start exploration at block', startBlock);
 
-            that.dbrunner.insertLastExploredBlock(--startBlock);
             that.rpcWallet.getBlockCount(function (err, result) {
                 if (!err) {
                     console.log('Total blocks', result);
@@ -401,15 +400,13 @@ class Core extends EventEmitter {
 
                             processBlockHash();
 
-                        } else if (startBlock >= blockCount) {
-                            //Exploration finish
-                            that.isExploring = false;
-                            that.dbrunner.updateLastExploredBlock(--startBlock, function (err, result) {
-                                //console.log(err, result);
-                            });
-                            that.emit('core.explore.finish', blockCount, startBlock);
                         } else {
-                            console.error(err);
+                            if (startBlock >= blockCount) {
+                                //Exploration finish
+                                that.isExploring = false;
+                            }
+
+                            that.emit('core.explore.finish', blockCount, startBlock);
                         }
                     })
                 } else {
@@ -417,8 +414,20 @@ class Core extends EventEmitter {
                     that.isExploring = false;
                 }
             });
-        });
+        };
 
+        if (!startBlock) {
+            this.dbrunner.getLastExploredBlock(function (err, result) {
+                if (err) {
+                    console.log(err);
+                } else if (result.length > 0) {
+                    result = result[0];
+                    startExploration(result.lastExploredBlock+1);
+                }
+            })
+        } else {
+            startExploration(startBlock);
+        }
     }
 
     restart(callback) {
