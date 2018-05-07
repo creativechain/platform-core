@@ -230,7 +230,7 @@ class Core extends EventEmitter {
     stop(callback) {
         this.emit('core.stop');
         this.dbrunner.close();
-        this.ipfsrunner.stop();
+        this.ipfsrunner.send('close');
         this.rpcWallet.stop();
 
         if (callback) {
