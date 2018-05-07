@@ -67,29 +67,26 @@ class IpfsClient extends IPFS {
                 ipfsData.infoHash = ipfsData.hash;
                 ipfsData.CID = ipfsData.hash + '/' + name;
 
-                setTimeout(function () {
-                    let request = require('request');
+                let request = require('request');
 
-                    let headers = {
-                        'User-Agent': 'Super Agent/0.0.1',
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    };
+                let headers = {
+                    'User-Agent': 'Super Agent/0.0.1',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                };
 
-                    let options = {
-                        method: 'GET',
-                        headers: headers,
-                        form: {'ipfs': ipfsData.hash, }
-                    };
+                let options = {
+                    method: 'GET',
+                    headers: headers,
+                    form: {'ipfs': ipfsData.hash, }
+                };
 
-                    that.configuration.shareUrls.forEach(function (url) {
-                        url = url + ipfsData.hash;
-                        options.url = url;
-                        request(options, function (error, response, body) {
-                            console.log('IPFS Shared on', url)
-                        });
+                that.configuration.shareUrls.forEach(function (url) {
+                    url = url + ipfsData.hash;
+                    options.url = url;
+                    request(options, function (error, response, body) {
+                        console.log('IPFS Shared on', url)
                     });
-
-                }, 100);
+                });
 
                 if (callback) {
                     callback(null, file, ipfsData);

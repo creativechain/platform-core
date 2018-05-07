@@ -169,7 +169,7 @@ IndexDB.prototype.addAuthor = function(user, tx, date, callback) {
     let that = this;
     this.tryRun(function () {
         let insertUser = that.prepare('REPLACE INTO Author VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        this.getAuthor(user.address, user.address, function (err, result) {
+        that.getAuthor(user.address, user.address, function (err, result) {
 
             if (err) {
                 console.error(err);

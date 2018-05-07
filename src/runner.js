@@ -30,9 +30,7 @@ class Runner extends EventEmitter {
             responseArgs.unshift(data.event);
 
             that.emit.apply(that, responseArgs);
-            setTimeout(function () {
-                that.removeAllListeners(data.event)
-            }, 500);
+            that.removeAllListeners(data.event)
         });
 
         this.fork.on('close', (code, signal) => {
