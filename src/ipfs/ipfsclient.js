@@ -22,6 +22,16 @@ class IpfsClient extends IPFS {
         }
 
         this.configuration = config;
+
+        let lockFile = config.constants.IPFS_DIR + 'repo.lock';
+
+        //Delete repo.lock file for previous instance
+        if (File.exist(lockFile)) {
+            let lockPid = File.read(lockFile);
+            lockPid = JSON.parse(lockPid);
+            OS.kill(lockPid.ownerPID);
+            File.remove(lockFile);
+        }
     }
 
     connect(swarm, callback) {

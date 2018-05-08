@@ -130,6 +130,17 @@ class OS {
             callback(true);
         }
     };
+
+    static kill(pid) {
+        let cmd = 'kill';
+        let cmdArgs = [pid, '-9'];
+        if (OS.isWindows()) {
+            cmd = 'taskkill';
+            cmdArgs = ['/PID', pid, '/F'];
+        }
+
+        OS.run(cmd, cmdArgs);
+    }
 }
 
 class File {
@@ -189,6 +200,16 @@ class File {
     static cp(source, dest) {
         console.log('Copying', source, dest);
         fs.createReadStream(source).pipe(fs.createWriteStream(dest));
+    }
+
+    /**
+     *
+     * @param {string} path
+     */
+    static remove(path) {
+        if (File.exist(path)) {
+            fs.unlinkSync(path);
+        }
     }
 
     /**
