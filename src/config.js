@@ -212,6 +212,14 @@ class CoreConfiguration extends Configuration {
         } else {
             this.network = TrantorNetwork.TESTNET;
         }
+
+        //Create directories
+        File.mkpath(constants.DB_DIR);
+        File.mkpath(constants.IPFS_DIR);
+        File.mkpath(constants.LOG_DIR);
+        File.mkpath(constants.BIN_DIR);
+        File.mkpath(constants.WALLET_DIR);
+        File.mkpath(constants.DATA_DIR);
     }
 }
 
