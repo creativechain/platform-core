@@ -870,7 +870,7 @@ class Core extends EventEmitter {
                         that.error(err);
                     } else {
                         let txBuffer = Buffer.from(rawTx, 'hex');
-                        that.events.emit('core.block.build', creaBuilder, txBuffer, followData, txBuilder);
+                        that.emit('core.block.build', creaBuilder, txBuffer, followData, txBuilder);
                     }
                 })
             }
