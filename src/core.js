@@ -155,7 +155,7 @@ class Core extends EventEmitter {
 
         let startDb = function () {
             //that.dbrunner.start(that.constants.DATABASE_FILE, that.constants.DATABASE_CREATION_FILE);
-            that.dbrunner = new IndexDB(this.constants.DATABASE_FILE, this.constants.DATABASE_CREATION_FILE);
+            that.dbrunner = new IndexDB(that.constants.DATABASE_FILE, that.constants.DATABASE_CREATION_FILE);
             that.dbrunner.migrate(that.constants.DBMIGRATIONS_DIR, function (err) {
                 console.log('Database initialized', err);
                 callCallback();
