@@ -1001,7 +1001,7 @@ IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
         "(u.user_address = m.author) WHERE ";
 
     tags.forEach(function (tag, index) {
-        query += "m.tags LIKE '%" + tag + "%'";
+        query += "m.address LIKE '%" + tag + "%' OR m.tags LIKE '%" + tag + "%'";
         if (index < (tags.length -1)) {
             query += " OR ";
         }
