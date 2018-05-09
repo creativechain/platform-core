@@ -120,13 +120,15 @@ class OS {
         exec(finalCommand, function (error, stdout, stderr) {
             if (error) {
                 console.error(`exec error: ${error}`);
-                callback(false, error);
-            } else {
+                if (callback) {
+                    callback(false, error);
+                }
+            } else if (callback) {
                 callback(true);
             }
         });
 
-        if (OS.isWindows()) {
+        if (OS.isWindows() && callback) {
             callback(true);
         }
     };
