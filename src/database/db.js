@@ -675,9 +675,16 @@ IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
  *
  * @param {string} authorAddress
  * @param {string} userAddress
+ * @param {number} page
  * @param callback
  */
-IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, callback) {
+IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, page, callback) {
+    if (!page) {
+        page = 1;
+    }
+
+    let offset = (page * 20) - 20;
+
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
@@ -696,7 +703,7 @@ IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, callba
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' ORDER BY m.creation_date DESC;", callback)
+        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 };
 
 IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddress, page, callback) {
@@ -726,7 +733,7 @@ IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddr
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON (u.user_address = m.author) " +
         ") n  " +
-        "ON (n.author = f.followed_address) WHERE f.follower_address = '" + followerAddress + "' AND f.type = 6  AND n.address NOT NULL " +
+        "ON (n.author = f.followed_address) WHERE f.follower_address = '" + followerAddress + "' AND f.type = 6 AND n.address NOT NULL " +
         "ORDER BY n.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 
 };
