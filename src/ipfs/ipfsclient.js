@@ -1,6 +1,6 @@
 const IPFS = require('ipfs');
 const Error = require('../error');
-const {File} = require('../utils');
+const {File, OS} = require('../utils');
 
 class IpfsClient extends IPFS {
 
