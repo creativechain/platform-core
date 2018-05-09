@@ -223,6 +223,7 @@ IndexDB.prototype.getAuthor = function(address, userAddress, callback) {
         "(SELECT count(*) FROM 'Media' m WHERE m.author = '" + address + "') AS publications, " +
         "(SELECT count(*) FROM 'Following' f WHERE f.type = 6 AND f.followed_address = '" + address +"') AS followers, " +
         "(SELECT count(*) FROM 'Following' f2 WHERE f2.type = 6 AND f2.followed_address = '" + address +"' AND f2.follower_address = '" + userAddress + "') AS user_following, " +
+        "(SELECT count(*) FROM 'Following' f2 WHERE f2.type = 6 AND f2.followed_address = '" + userAddress +"' AND f2.follower_address = '" + address + "') AS user_followed, " +
         "(SELECT t.file FROM 'Torrent' t WHERE a.avatar = t.magnet) AS avatarFile " +
         "From Author a WHERE a.address = '" + address + "'", callback);
 };
