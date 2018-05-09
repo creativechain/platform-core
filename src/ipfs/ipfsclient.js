@@ -28,8 +28,13 @@ class IpfsClient extends IPFS {
         //Delete repo.lock file for previous instance
         if (File.exist(lockFile)) {
             let lockPid = File.read(lockFile);
-            lockPid = JSON.parse(lockPid);
-            OS.kill(lockPid.ownerPID);
+            try {
+                lockPid = JSON.parse(lockPid);
+                OS.kill(lockPid.ownerPID);
+            } catch (e) {
+                console.error(e);
+            }
+
             File.remove(lockFile);
         }
     }
