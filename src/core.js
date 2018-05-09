@@ -25,7 +25,7 @@ class Core extends EventEmitter {
         this.txContentAmount = txContentAmount;
         this.txFeeKb = txFeeKb;
         this.constants = coreConfig.constants;
-        this.dbrunner = new IndexDB(this.constants.DATABASE_FILE, this.constants.DATABASE_CREATION_FILE);
+        this.dbrunner = null;
         //this.dbrunner = new Runner(__dirname + '/database/dbrunner.js', 'db', coreConfig.constants.LOG_DIR + 'db.log');
         this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs', coreConfig.constants.LOG_DIR + 'ipfs.log');
         //this.ipfsrunner = null; //new IpfsClient(coreConfig.ipfsConfig);
@@ -155,7 +155,7 @@ class Core extends EventEmitter {
 
         let startDb = function () {
             //that.dbrunner.start(that.constants.DATABASE_FILE, that.constants.DATABASE_CREATION_FILE);
-
+            that.dbrunner = new IndexDB(this.constants.DATABASE_FILE, this.constants.DATABASE_CREATION_FILE);
             that.dbrunner.migrate(that.constants.DBMIGRATIONS_DIR, function (err) {
                 console.log('Database initialized', err);
                 callCallback();
