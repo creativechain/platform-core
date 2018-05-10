@@ -96,11 +96,14 @@ class IpfsClient extends IPFS {
                 };
 
                 that.configuration.shareUrls.forEach(function (url) {
+                    let ops = options;
                     if (url.includes('gateway')) {
                         url = url + ipfsData.hash;
+                    } else {
+                        ops.method = 'POST';
                     }
 
-                    options.url = url;
+                    ops.url = url;
                     request(options, function (error, response, body) {
                         console.log('IPFS Shared on', url)
                     });
