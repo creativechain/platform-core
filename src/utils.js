@@ -194,6 +194,10 @@ class File {
         return fs.readFileSync(path, format);
     }
 
+    static readDir(path, format = 'utf8') {
+        return fs.readdirSync(path, format);
+    }
+
     /**
      *
      * @param source
@@ -212,6 +216,10 @@ class File {
         if (File.exist(path)) {
             fs.unlinkSync(path);
         }
+    }
+
+    static removeDir(path) {
+        fs.rmdirSync(path);
     }
 
     /**
