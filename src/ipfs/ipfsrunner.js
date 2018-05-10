@@ -9,7 +9,7 @@ function bindMethod(data) {
         if (data.arguments.length > 1) {
             let logFile = data.arguments[1];
             let log = fs.createWriteStream(logFile);
-            process.stdout.write = process.stderr.write = log.write.bind(log);
+            //process.stdout.write = process.stderr.write = log.write.bind(log);
         }
 
         let response = {
