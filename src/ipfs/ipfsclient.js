@@ -89,23 +89,28 @@ class IpfsClient extends IPFS {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 };
 
-                let options = {
-                    method: 'GET',
-                    headers: headers,
-                    form: {'ipfs': ipfsData.hash, }
-                };
-
                 that.configuration.shareUrls.forEach(function (url) {
-                    let ops = options;
+                    let options = {
+                        method: 'GET',
+                        headers: headers,
+                        form: {'ipfs': ipfsData.hash, }
+                    };
+
                     if (url.includes('gateway')) {
                         url = url + ipfsData.hash;
+                        options.form = null;
                     } else {
-                        ops.method = 'POST';
+                        options.method = 'POST';
                     }
 
-                    ops.url = url;
+                    options.url = url;
+                    console.log('sharing', options.url);
                     request(options, function (error, response, body) {
-                        console.log('IPFS Shared on', url)
+                        if (error) {
+                            console.error(error);
+                        } else {
+                            console.log('IPFS Shared on', url)
+                        }
                     });
                 });
 
