@@ -616,7 +616,7 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
+        "(u.user_address = m.author) WHERE blocked = 0 ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 };
 
 /**
