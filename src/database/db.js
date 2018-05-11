@@ -135,7 +135,7 @@ IndexDB.prototype.tryRun = function(runCall, callback) {
             callback(null, null);
         }
     }
-}
+};
 
 /**
  *
@@ -600,6 +600,7 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -630,6 +631,7 @@ IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callbac
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
         "(SELECT SUM(p.amount) FROM Payment p WHERE p.content_id = m.address GROUP BY p.content_id) AS received_amount, " +
@@ -659,6 +661,7 @@ IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
         "(SELECT SUM(p.amount) FROM Payment p WHERE p.content_id = m.address GROUP BY p.content_id) AS received_amount, " +
@@ -697,6 +700,7 @@ IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, page, 
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -728,6 +732,7 @@ IndexDB.prototype.getAllMediaByAuthor = function(authorAddress, userAddress, cal
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -759,6 +764,7 @@ IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddr
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
@@ -786,6 +792,7 @@ IndexDB.prototype.getMediaByFollowedAddress = function(followedAddress, callback
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
         "(SELECT SUM(p.amount) FROM Payment p WHERE p.content_id = m.address GROUP BY p.content_id) AS received_amount, " +
@@ -827,6 +834,7 @@ IndexDB.prototype.getPlatformUpdates = function(updater, os, userAddress, callba
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
         "(SELECT SUM(p.amount) FROM Payment p WHERE p.content_id = m.address GROUP BY p.content_id) AS received_amount, " +
@@ -1038,6 +1046,7 @@ IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
         "(SELECT SUM(p.amount) FROM Payment p WHERE p.content_id = m.address GROUP BY p.content_id) AS received_amount, " +
