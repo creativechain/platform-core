@@ -222,6 +222,7 @@ IndexDB.prototype.getAuthor = function(address, userAddress, callback) {
         "(SELECT count(*) FROM 'Comment' c, Media m WHERE c.author != '" + address + "' AND m.author = '" + address + "' AND c.content_id = m.address) AS comments, " +
         "(SELECT count(*) FROM 'Media' m WHERE m.author = '" + address + "') AS publications, " +
         "(SELECT count(*) FROM 'Following' f WHERE f.type = 6 AND f.followed_address = '" + address +"') AS followers, " +
+        "(SELECT count(*) FROM 'Following' f2 WHERE f2.type = 18 AND f2.followed_address = '" + address +"' AND f2.follower_address = '" + userAddress + "') AS user_blocked, " +
         "(SELECT count(*) FROM 'Following' f2 WHERE f2.type = 6 AND f2.followed_address = '" + address +"' AND f2.follower_address = '" + userAddress + "') AS user_following, " +
         "(SELECT count(*) FROM 'Following' f2 WHERE f2.type = 6 AND f2.followed_address = '" + userAddress +"' AND f2.follower_address = '" + address + "') AS user_followed, " +
         "(SELECT t.file FROM 'Torrent' t WHERE a.avatar = t.magnet) AS avatarFile " +
@@ -596,7 +597,8 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
 
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
@@ -608,6 +610,7 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
         "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
@@ -624,7 +627,8 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
 IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callback) {
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -635,6 +639,7 @@ IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callbac
         "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
@@ -651,7 +656,8 @@ IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callbac
 IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -662,6 +668,7 @@ IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
         "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
@@ -687,7 +694,8 @@ IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, page, 
 
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
@@ -699,6 +707,7 @@ IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, page, 
         "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
@@ -716,7 +725,8 @@ IndexDB.prototype.getAllMediaByAuthor = function(authorAddress, userAddress, cal
 
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = m.address) AS user_liked, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
@@ -728,6 +738,7 @@ IndexDB.prototype.getAllMediaByAuthor = function(authorAddress, userAddress, cal
         "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
@@ -745,7 +756,8 @@ IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddr
     this.select("SELECT f.follower_address, n.* FROM Following f " +
         "LEFT JOIN (SELECT m.*,  " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -757,6 +769,7 @@ IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddr
         "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
@@ -771,7 +784,7 @@ IndexDB.prototype.getMediaByFollowedAddress = function(followedAddress, callback
     this.select("SELECT f.followed_address, n.* FROM Following f " +
         "LEFT JOIN (SELECT m.*,  " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -811,7 +824,8 @@ IndexDB.prototype.getMediaAddressByAuthor = function(authorAddress, callback) {
 IndexDB.prototype.getPlatformUpdates = function(updater, os, userAddress, callback) {
     this.select("SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -822,6 +836,7 @@ IndexDB.prototype.getPlatformUpdates = function(updater, os, userAddress, callba
         "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
@@ -1020,7 +1035,8 @@ IndexDB.prototype.getContentTags = function(tags, callback) {
 IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
     let query = "SELECT m.*, " +
         "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
-        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
         "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
         "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
         "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
@@ -1031,6 +1047,7 @@ IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
         "(SELECT count(*) FROM Comment c WHERE c.author = a.address) AS user_comments, " +
         "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
         "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
         "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
         "(SELECT count(*) FROM 'Like' l WHERE l.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul WHERE ul.author = a.address) AS user_unlikes, " +

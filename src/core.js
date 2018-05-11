@@ -8,7 +8,7 @@ let IndexDB = require('./database/db');
 let {OS, File, Utils} = require('./utils');
 let {DecodedTransaction, Spendable, TransactionBuilder} = require('./txwrapper');
 let {Constants, TrantorUtils, ContentData, Author, Like, Follow, Unfollow, MediaData, Comment, Payment,
-    BlockContent} = require('trantor-js');
+    BlockContent, UnblockContent} = require('trantor-js');
 let creativecoin = require('bitcoinjs-lib');
 
 
