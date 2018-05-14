@@ -447,11 +447,10 @@ IndexDB.prototype.getFollowingData = function(followerAddress, followedAddress, 
 /**
  *
  * @param {string} author
- * @param {string} resource
  * @param callback
  */
-IndexDB.prototype.getBlocked = function(author, resource, callback) {
-    this.getFollowingData(author, resource, Constants.TYPE.BLOCK, callback);
+IndexDB.prototype.getBlocked = function(author, callback) {
+    this.select("SELECT * FROM Following f WHERE f.follower_address = '" + author + "' AND f.type = 17;", callback);
 };
 
 /**
