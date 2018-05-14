@@ -877,6 +877,25 @@ class Core extends EventEmitter {
         })
     }
 
+    unblock(userAddress, followedAddress) {
+        let that = this;
+        let followData = new UnblockContent(userAddress, followedAddress);
+        this.createDataTransaction(followData, userAddress, null, function (error, creaBuilder, spendables, txBuilder) {
+            if (error) {
+                that.error(error);
+            } else {
+                that.signTransaction(creaBuilder, spendables, function (err, rawTx) {
+                    if (err) {
+                        that.error(err);
+                    } else {
+                        let txBuffer = Buffer.from(rawTx, 'hex');
+                        that.emit('core.unblock.build', creaBuilder, txBuffer, followData, txBuilder);
+                    }
+                })
+            }
+        })
+    }
+
     insertMedia(media, tx, date, callback) {
         this.dbrunner.addMedia(media, tx, date, callback);
     }
