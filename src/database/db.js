@@ -646,7 +646,7 @@ IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callbac
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.txid = '" + contentId + "' ORDER BY m.creation_date DESC;", callback)
+        "(u.user_address = m.author) WHERE m.txid = '" + contentId + "' AND blocked = 0 ORDER BY m.creation_date DESC;", callback)
 };
 
 /**
@@ -678,7 +678,7 @@ IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = '" + address + "') AS user_liked, " +
         "(SELECT count(*) FROM 'Unlike' uld WHERE uld.author = '" + userAddress + "' AND uld.content_id = '" + address + "') AS user_unliked, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.address = '" + address + "' ORDER BY m.creation_date DESC;", callback)
+        "(u.user_address = m.author) WHERE m.address = '" + address + "' AND blocked = 0 ORDER BY m.creation_date DESC;", callback)
 };
 
 /**
@@ -716,7 +716,7 @@ IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, page, 
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
+        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0  ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 };
 
 /**
@@ -748,7 +748,7 @@ IndexDB.prototype.getAllMediaByAuthor = function(authorAddress, userAddress, cal
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' ORDER BY m.creation_date DESC;", callback)
+        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0  ORDER BY m.creation_date DESC;", callback)
 };
 
 IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddress, page, callback) {
@@ -782,7 +782,7 @@ IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddr
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON (u.user_address = m.author) " +
         ") n  " +
         "ON (n.author = f.followed_address) WHERE f.follower_address = '" + followerAddress + "' AND f.type = 6 AND n.address NOT NULL " +
-        "ORDER BY n.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
+        " AND blocked = 0 ORDER BY n.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 
 };
 
@@ -1111,6 +1111,16 @@ IndexDB.prototype.getPayment = function(userAddress, contentAddress, callback) {
 
 IndexDB.prototype.getDonationFromMedia = function(mediaAddress, callback) {
     this.select('SELECT * FROM Donation WHERE content_id = "' + mediaAddress + '" ORDER BY creation_date DESC', callback)
+};
+
+/**
+ *
+ * @param {UnblockContent} unblock
+ * @param callback
+ */
+IndexDB.prototype.removeBlock = function(unblock, callback) {
+    this.run("DELETE FROM Following WHERE Following.follower_address = '" + unblock.followerAddress + "' AND " +
+        "Following.followed_address = '" + unblock.followedAddress + "' AND Following.type = " + unblock.type + ";", callback);
 };
 
 if (module) {
