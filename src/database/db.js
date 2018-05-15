@@ -682,6 +682,38 @@ IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
 
 /**
  *
+ * @param {string} address
+ * @param callback
+ * @param {string} userAddress
+ */
+IndexDB.prototype.getBlockedMediaByAddress = function(address, userAddress, callback) {
+    this.select("SELECT m.*, " +
+        "(SELECT count(*) FROM 'Like' l WHERE m.address = l.content_id) AS likes, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.type = 17) AS blocks, " +
+        "(SELECT count(*) FROM 'Following' b WHERE m.address = b.followed_address AND b.follower_address = '" + userAddress + "' AND b.type = 17) AS blocked, " +
+        "(SELECT count(*) FROM Comment c WHERE m.address = c.content_id) AS comments, " +
+        "(SELECT count(*) FROM Payment p WHERE m.address = p.content_id) AS downloads, " +
+        "(SELECT t.file FROM Torrent t WHERE t.magnet = m.public_content) AS featured_image, " +
+        "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = m.private_content) AS private_file, " +
+        "(SELECT SUM(p.amount) FROM Payment p WHERE p.content_id = m.address GROUP BY p.content_id) AS received_amount, " +
+        "u.* FROM Media m LEFT JOIN " +
+        "(SELECT a.address AS user_address, a.name, a.email, a.web, a.description AS user_description, a.avatar, a.tags AS user_tags, a.creation_date AS user_creation_date,  " +
+        "(SELECT t2.file FROM Torrent t2 WHERE t2.magnet = a.avatar) AS avatarFile, " +
+        "(SELECT count(*) FROM Comment c, Media m WHERE c.author != a.address AND m.author = a.address AND c.content_id = m.address) AS user_comments, " +
+        "(SELECT count(*) FROM Following f WHERE f.follower_address = a.address AND f.type = 6) AS user_following, " +
+        "(SELECT count(*) FROM Following f2 WHERE f2.followed_address = a.address AND f2.type = 6) AS user_followers, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
+        "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 6) AS following, " +
+        "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
+        "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
+        "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = '" + address + "') AS user_liked, " +
+        "(SELECT count(*) FROM 'Unlike' uld WHERE uld.author = '" + userAddress + "' AND uld.content_id = '" + address + "') AS user_unliked, " +
+        "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
+        "(u.user_address = m.author) WHERE m.address = '" + address + "' AND blocked >= 1 ORDER BY m.creation_date DESC;", callback)
+};
+
+/**
+ *
  * @param {string} authorAddress
  * @param {string} userAddress
  * @param {number} page
@@ -715,7 +747,7 @@ IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, page, 
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0  ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
+        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0 ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 };
 
 /**
@@ -1060,7 +1092,7 @@ IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
         "(SELECT count(*) FROM 'Like' l WHERE l.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul WHERE ul.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE ";
+        "(u.user_address = m.author) WHERE blocked = 0 AND ";
 
     tags.forEach(function (tag, index) {
         query += "m.address LIKE '%" + tag + "%' OR m.tags LIKE '%" + tag + "%'";
