@@ -1118,8 +1118,8 @@ IndexDB.prototype.getDonationFromMedia = function(mediaAddress, callback) {
  * @param callback
  */
 IndexDB.prototype.removeBlock = function(unblock, callback) {
-    this.run("DELETE FROM Following WHERE Following.follower_address = '" + unblock.followerAddress + "' AND " +
-        "Following.followed_address = '" + unblock.followedAddress + "' AND Following.type = " + unblock.type + ";", callback);
+    this.run("DELETE FROM Following f WHERE f.follower_address = '" + unblock.followerAddress + "' AND " +
+        "f.followed_address = '" + unblock.followedAddress + "' AND f.type = " + unblock.type + ";", callback);
 };
 
 if (module) {
