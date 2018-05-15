@@ -31,7 +31,7 @@
     "bitcoinjs-lib": "^3.3.2",
     "coinselect": "github:creativechain/coinselect",
     "file-size": "^1.0.0",
-    "ipfs": "^0.28.2",
+    "ipfs": "git+https://projects.owldevelopers.site/fix/js-ipfs",
     "lzma": "^2.3.2",
     "path": "^0.12.7",
     "sha256": "^0.2.0",
