@@ -615,7 +615,7 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE blocked = 0 ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
+        "(u.user_address = m.author) WHERE blocked = 0 AND user_blocked = 0 ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 };
 
 /**
@@ -645,7 +645,7 @@ IndexDB.prototype.getMediaByContentId = function(contentId, userAddress, callbac
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.txid = '" + contentId + "' AND blocked = 0 ORDER BY m.creation_date DESC;", callback)
+        "(u.user_address = m.author) WHERE m.txid = '" + contentId + "' AND blocked = 0 AND user_blocked = 0 ORDER BY m.creation_date DESC;", callback)
 };
 
 /**
@@ -677,7 +677,7 @@ IndexDB.prototype.getMediaByAddress = function(address, userAddress, callback) {
         "(SELECT count(*) FROM 'Like' ld WHERE ld.author = '" + userAddress + "' AND ld.content_id = '" + address + "') AS user_liked, " +
         "(SELECT count(*) FROM 'Unlike' uld WHERE uld.author = '" + userAddress + "' AND uld.content_id = '" + address + "') AS user_unliked, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.address = '" + address + "' AND blocked = 0 ORDER BY m.creation_date DESC;", callback)
+        "(u.user_address = m.author) WHERE m.address = '" + address + "' AND blocked = 0 AND user_blocked = 0 ORDER BY m.creation_date DESC;", callback)
 };
 
 /**
@@ -747,7 +747,7 @@ IndexDB.prototype.getMediaByAuthor = function(authorAddress, userAddress, page, 
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0 ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
+        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0 AND user_blocked = 0 ORDER BY m.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 };
 
 /**
@@ -779,7 +779,7 @@ IndexDB.prototype.getAllMediaByAuthor = function(authorAddress, userAddress, cal
         "(SELECT count(*) FROM 'Like' l, Media m WHERE l.author != a.address AND l.content_id = m.address AND m.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul, Media m WHERE ul.content_id = m.address AND m.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0  ORDER BY m.creation_date DESC;", callback)
+        "(u.user_address = m.author) WHERE m.author = '" + authorAddress + "' AND blocked = 0 AND user_blocked = 0 ORDER BY m.creation_date DESC;", callback)
 };
 
 IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddress, page, callback) {
@@ -813,7 +813,7 @@ IndexDB.prototype.getMediaByFollowerAddress = function(followerAddress, userAddr
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON (u.user_address = m.author) " +
         ") n  " +
         "ON (n.author = f.followed_address) WHERE f.follower_address = '" + followerAddress + "' AND f.type = 6 AND n.address NOT NULL " +
-        " AND blocked = 0 ORDER BY n.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
+        " AND blocked = 0 AND user_blocked = 0 ORDER BY n.creation_date DESC LIMIT 20 OFFSET " + offset + ";", callback)
 
 };
 
@@ -1092,7 +1092,7 @@ IndexDB.prototype.getMediaByTags = function(tags, userAddress, callback) {
         "(SELECT count(*) FROM 'Like' l WHERE l.author = a.address) AS user_likes, " +
         "(SELECT count(*) FROM 'Unlike' ul WHERE ul.author = a.address) AS user_unlikes, " +
         "(SELECT count(*) FROM 'Media' m2 WHERE m2.author = a.address) AS publications FROM Author a) u ON " +
-        "(u.user_address = m.author) WHERE blocked = 0 AND ";
+        "(u.user_address = m.author) WHERE blocked = 0 AND user_blocked = 0 AND ";
 
     tags.forEach(function (tag, index) {
         query += "m.address LIKE '%" + tag + "%' OR m.tags LIKE '%" + tag + "%'";
@@ -1116,7 +1116,8 @@ IndexDB.prototype.getAuthorsByTags = function(tags, userAddress, callback) {
 
         let query = 'SELECT a.*, ' +
             '(SELECT t.file FROM Torrent t WHERE t.magnet = a.avatar) AS avatarFile ' +
-            'FROM Author a WHERE ';
+            "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
+            'FROM Author a WHERE user_blocked = 0 AND ';
         tags.forEach(function (tag, index) {
             query += "a.tags LIKE '%" + tag + "%' OR a.name LIKE '%" + tag + "%' OR a.address = '" + tag + "'";
             if (index < (tags.length -1)) {
