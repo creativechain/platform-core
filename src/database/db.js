@@ -1115,8 +1115,8 @@ IndexDB.prototype.getAuthorsByTags = function(tags, userAddress, callback) {
     if (tags.length > 0) {
 
         let query = 'SELECT a.*, ' +
-            '(SELECT t.file FROM Torrent t WHERE t.magnet = a.avatar) AS avatarFile ' +
-            "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked, " +
+            '(SELECT t.file FROM Torrent t WHERE t.magnet = a.avatar) AS avatarFile, ' +
+            "(SELECT count(*) FROM Following f3 WHERE f3.followed_address = a.address AND f3.follower_address = '" + userAddress + "' AND f3.type = 17) AS user_blocked " +
             'FROM Author a WHERE user_blocked = 0 AND ';
         tags.forEach(function (tag, index) {
             query += "a.tags LIKE '%" + tag + "%' OR a.name LIKE '%" + tag + "%' OR a.address = '" + tag + "'";
