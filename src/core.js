@@ -934,14 +934,14 @@ class Core extends EventEmitter {
     log(...args) {
         if (this.configuration.debug) {
             args.unshift('core.log');
-            this.emit.apply(this, args);
+            this.emit.apply(this, ...args);
         }
     }
 
     error(...args) {
         if (this.configuration.debug) {
             args.unshift('core.error');
-            this.emit.apply(this, args);
+            this.emit.apply(this, ...args);
         }
 
     }
