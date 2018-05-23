@@ -197,8 +197,9 @@ class CoreConfiguration extends Configuration {
      * @param constants
      * @param {RPCConfiguration} rpcConfig
      * @param {IpfsConfiguration} ipfsConfig
+     * @param {boolean} debug
      */
-    constructor(constants, rpcConfig, ipfsConfig) {
+    constructor(constants, rpcConfig, ipfsConfig, debug = true) {
         super(constants);
         this.rpcConfig = rpcConfig ? rpcConfig : RPCConfiguration.getDefault(constants);
         this.ipfsConfig = ipfsConfig ? ipfsConfig : IpfsConfiguration.getDefault(constants);
@@ -213,6 +214,7 @@ class CoreConfiguration extends Configuration {
             this.network = TrantorNetwork.TESTNET;
         }
 
+        this.debug = debug;
         //Create directories
         File.mkpath(constants.DB_DIR);
         File.mkpath(constants.IPFS_DIR);
