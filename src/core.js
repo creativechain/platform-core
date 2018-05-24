@@ -222,15 +222,15 @@ class Core extends EventEmitter {
         let that =this;
 
         this.ipfsrunner.on('close', function (code, signal) {
-            if (signal.toLowerCase() !== 'SIGTERM') {
-                that.logger.error('IPFS close event - Signal received:', signal, 'Code:', code);
+            that.logger.error('IPFS close event - Signal received:', signal, 'Code:', code);
+            if (signal && signal.toLowerCase() !== 'SIGTERM') {
                 that.restartIpfs();
             }
         });
 
         this.ipfsrunner.on('exit', function (code, signal) {
-            if (signal.toLowerCase() !== 'SIGTERM') {
-                that.logger.error('IPFS exit event - Signal received:', signal, 'Code:', code);
+            that.logger.error('IPFS exit event - Signal received:', signal, 'Code:', code);
+            if (signal && signal.toLowerCase() !== 'SIGTERM') {
                 that.restartIpfs();
             }
         });
