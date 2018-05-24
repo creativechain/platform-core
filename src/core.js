@@ -221,7 +221,22 @@ class Core extends EventEmitter {
     }
 
     startIpfs(callback) {
-        let that =this;
+        let that = this;
+
+        //Delete repo.lock file for previous instance
+        let lockFile = this.constants.IPFS_DIR + 'repo.lock';
+
+        if (File.exist(lockFile)) {
+            let lockPid = File.read(lockFile);
+            try {
+                lockPid = JSON.parse(lockPid);
+                OS.kill(lockPid.ownerPID);
+            } catch (e) {
+                this.logger.error(e);
+            }
+
+            File.remove(lockFile);
+        }
 
         this.ipfsrunner.on('close', function (code, signal) {
             that.logger.error('IPFS close event - Signal received:', signal, 'Code:', code);

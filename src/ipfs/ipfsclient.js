@@ -36,22 +36,6 @@ class IpfsClient extends IPFS {
 
         this.logger = log4js.getLogger('ipfsclient');
         this.logger.level = 'all';
-
-
-        //Delete repo.lock file for previous instance
-        let lockFile = config.constants.IPFS_DIR + 'repo.lock';
-
-        if (File.exist(lockFile)) {
-            let lockPid = File.read(lockFile);
-            try {
-                lockPid = JSON.parse(lockPid);
-                OS.kill(lockPid.ownerPID);
-            } catch (e) {
-                this.logger.error(e);
-            }
-
-            File.remove(lockFile);
-        }
     }
 
     connect(swarm, callback) {
