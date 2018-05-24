@@ -320,7 +320,10 @@ class Core extends EventEmitter {
                 that.logger.debug('Wallet restored!');
                 that.startDaemon(callback);
             }, 7000);
+        } else if (callback) {
+            callback(Error.FILE_NOT_FOUND);
         }
+
     }
 
     /**
