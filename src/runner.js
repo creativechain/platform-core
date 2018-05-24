@@ -82,9 +82,12 @@ class Runner extends EventEmitter {
     }
 
     stop() {
-        this.send('close');
-        this.fork.disconnect();
-        this.fork.kill('SIGTERM');
+        let that = this;
+        this.send('close', function () {
+            that.fork.disconnect();
+            that.fork.kill('SIGTERM');
+        });
+
     }
 }
 

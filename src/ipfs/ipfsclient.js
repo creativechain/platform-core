@@ -175,10 +175,13 @@ class IpfsClient extends IPFS {
         }
     }
 
-    close() {
+    close(callback) {
         let that = this;
         this.stop(function () {
             that.logger.info('IPFS node stopped!');
+            if (callback) {
+                callback();
+            }
         });
     }
 }
