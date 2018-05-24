@@ -36,7 +36,6 @@ function bindMethod(data) {
 
 function closeClient() {
     ipfsClient.close();
-    process.kill(process.pid, 'SIGTERM')
 }
 
 process.on('message', (data) => {
