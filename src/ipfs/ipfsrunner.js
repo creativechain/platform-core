@@ -34,12 +34,6 @@ function bindMethod(data) {
     }
 }
 
-function closeClient() {
-    ipfsClient.close();
-}
-
 process.on('message', (data) => {
     bindMethod(data);
 });
-
-process.on('SIGTERM', closeClient);
