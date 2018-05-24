@@ -238,6 +238,9 @@ class Core extends EventEmitter {
             File.remove(lockFile);
         }
 
+        this.ipfsrunner.removeListener('close');
+        this.ipfsrunner.removeListener('exit');
+
         this.ipfsrunner.on('close', function (code, signal) {
             that.logger.error('IPFS close event - Signal received:', signal, 'Code:', code);
             if (signal && signal.toLowerCase() !== 'SIGTERM') {
