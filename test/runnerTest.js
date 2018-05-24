@@ -1,15 +1,15 @@
-let Runner = require('../src/runner');
+let log4js = require('log4js');
 
-let dbRunner = new Runner('./src/database/dbrunner.js', 'db');
-
-dbRunner.start('test.db', '/home/ander/WebstormProjects/creativechain-universe/extra/index.db.sql');
-dbRunner.send('migrate', ['/home/ander/WebstormProjects/creativechain-universe/extra/dbmigrations'], function (err) {
-    console.log('migration performed!', err)
+log4js.configure({
+    appenders: {
+        console: { type: 'console' },
+        everything: { type: 'file', filename: 'test.log', maxLogSize: 10485760, backups: 3, compress: true }
+    },
+    categories: { default: { appenders: [ 'console', 'everything' ], level: 'all' } }
 });
 
-setTimeout(function () {
 
-    dbRunner.send('getLastExploredBlock', function (err, result) {
-        console.log('Response', err, result);
-    })
-}, 3000);
+let logger = log4js.getLogger('test');
+
+logger.level = 'all';
+logger.warn('polla', { polla: 'coño'});

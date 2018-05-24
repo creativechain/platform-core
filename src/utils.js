@@ -8,6 +8,7 @@ let filesize = require('file-size');
 let path = require('path');
 let upath = require('upath');
 let request = require('request');
+let log4js = require('log4js');
 
 class OS {
 
@@ -116,7 +117,6 @@ class OS {
      */
     static run(command, args, callback) {
         let finalCommand = command + ' ' + (args.join(' '));
-        console.log('executing command', finalCommand);
         exec(finalCommand, function (error, stdout, stderr) {
             if (error) {
                 console.error(`exec error: ${error}`);
@@ -179,7 +179,6 @@ class File {
      * @param {string} format
      */
     static write(file, content, format = 'utf8') {
-        //console.log('Writing', path);
         File.mkpath(file, true);
         fs.writeFileSync(file, content, format);
     }
@@ -204,7 +203,6 @@ class File {
      * @param dest
      */
     static cp(source, dest) {
-        console.log('Copying', source, dest);
         fs.createReadStream(source).pipe(fs.createWriteStream(dest));
     }
 
@@ -254,7 +252,6 @@ class File {
      * @param {boolean} hasFile
      */
     static mkpath(path, hasFile = false) {
-        //console.log('Making dirs', path);
         path = File.normalizePath(path);
         let dirs = path.split('/');
         let route = '';
@@ -298,7 +295,6 @@ class File {
         });
 
         req.on('error', function (err) {
-            console.log('Resquest error', err);
             if (callback) {
                 callback(err);
             }
@@ -314,7 +310,6 @@ class File {
         });
 
         req.on('end', function () {
-            console.log('File downloaded!');
             if (callback) {
                 callback(null, targetPath);
             }
@@ -457,11 +452,9 @@ class Utils {
      * @param callback
      */
     static compress(data, mode, callback) {
-        console.log('Compressing data: ', data.length);
         let compressor = new lzma.LZMA();
         compressor.compress(data, mode, function (result, error) {
             result = Buffer.from(result);
-            console.log('Data compressed:', result.length);
             callback(result, error);
         })
     }

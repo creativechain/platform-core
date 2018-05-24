@@ -1,6 +1,8 @@
 const IPFS = require('ipfs');
 const Error = require('../error');
 const {File, OS} = require('../utils');
+const log4js = require('log4js');
+const {ConsoleAppender, FileAppender} = log4js;
 
 class IpfsClient extends IPFS {
 
@@ -23,16 +25,29 @@ class IpfsClient extends IPFS {
 
         this.configuration = config;
 
-        let lockFile = config.constants.IPFS_DIR + 'repo.lock';
+        //Setup logger
+        log4js.configure({
+            appenders: {
+                console: { type: 'console' },
+                everything: { type: 'file', filename: config.logFile, maxLogSize: 10485760, backups: 3, compress: true }
+            },
+            categories: { default: { appenders: [ 'console', 'everything' ], level: 'all' } }
+        });
+
+        this.logger = log4js.getLogger('ipfsclient');
+        this.logger.level = log4js.Level.ALL;
+
 
         //Delete repo.lock file for previous instance
+        let lockFile = config.constants.IPFS_DIR + 'repo.lock';
+
         if (File.exist(lockFile)) {
             let lockPid = File.read(lockFile);
             try {
                 lockPid = JSON.parse(lockPid);
                 OS.kill(lockPid.ownerPID);
             } catch (e) {
-                console.error(e);
+                this.logger.error(e);
             }
 
             File.remove(lockFile);
@@ -40,11 +55,12 @@ class IpfsClient extends IPFS {
     }
 
     connect(swarm, callback) {
+        let that = this;
         if (swarm) {
             this.swarm.connect(swarm, function (err) {
                 if (callback) {
                     if (err) {
-                        console.error(err);
+                        that.logger.error(err);
                         if (err.stack) {
                             callback(err.stack.toString());
                         } else {
@@ -56,7 +72,7 @@ class IpfsClient extends IPFS {
                 }
             })
         } else if (callback) {
-            console.error(Error.INVALID_SWARM);
+            that.logger.error(Error.INVALID_SWARM);
             callback(Error.INVALID_SWARM);
         }
     }
@@ -75,7 +91,7 @@ class IpfsClient extends IPFS {
 
         this.files.add(fileBuffer, function (err, resultFiles) {
             if (err && callback) {
-                console.error(err);
+                that.logger.error(err);
                 callback(err.stack.toString(), null, null)
             } else if (resultFiles.length > 0) {
                 let ipfsData = resultFiles[0];
@@ -104,12 +120,12 @@ class IpfsClient extends IPFS {
                     }
 
                     options.url = url;
-                    console.log('sharing', options.url);
+                    that.logger.info('sharing', options.url);
                     request(options, function (error, response, body) {
                         if (error) {
                             console.error(error);
                         } else {
-                            console.log('IPFS Shared on', url)
+                            that.logger.info('IPFS Shared on', url);
                         }
                     });
                 });
@@ -142,9 +158,9 @@ class IpfsClient extends IPFS {
 
             this.files.get(hash, function (err, files) {
                 if (err) {
-                    console.error(err);
+                    that.logger.error(err);
                 } else {
-                    console.log('File downloaded!', cid);
+                    that.logger.info('File downloaded!', cid);
 
                     let data = null;
                     for (let x = 0; x < files.length; x++) {
@@ -160,7 +176,7 @@ class IpfsClient extends IPFS {
                     }
 
                     let file = desPath + name;
-                    console.log('Writing', cid, file);
+                    that.logger.debug('Writing', cid, file);
                     File.write(file, data.content, 'binary');
 
                     if (callback) {
@@ -178,7 +194,7 @@ class IpfsClient extends IPFS {
     close() {
         let that = this;
         this.stop(function () {
-            console.log('IPFS node stopped!');
+            that.logger.info('IPFS node stopped!');
         });
     }
 }

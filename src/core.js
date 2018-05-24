@@ -10,6 +10,7 @@ let {DecodedTransaction, Spendable, TransactionBuilder} = require('./txwrapper')
 let {Constants, TrantorUtils, ContentData, Author, Like, Follow, Unfollow, MediaData, Comment, Payment,
     BlockContent, UnblockContent} = require('trantor-js');
 let creativecoin = require('bitcoinjs-lib');
+let log4js = require('log4js');
 
 
 class Core extends EventEmitter {
@@ -43,6 +44,18 @@ class Core extends EventEmitter {
 
         //Set network for trantor-js
         ContentData.NETWORK = coreConfig.network;
+
+        //Setup logger
+        log4js.configure({
+            appenders: {
+                console: { type: 'console' },
+                everything: { type: 'file', filename: this.configuration.logfile, maxLogSize: 10485760, backups: 3, compress: true }
+            },
+            categories: { default: { appenders: [ 'console', 'everything' ], level: 'all' } }
+        });
+
+        this.logger = log4js.getLogger('core');
+        this.logger.level = log4js.Level.ALL;
     }
 
     __checkBinariesExists(callback) {
@@ -51,7 +64,7 @@ class Core extends EventEmitter {
         let binaryName = this.constants.BINARY_NAME;
 
         let onFinish = function () {
-            console.log('checkBinaryExists - onFinish');
+            that.logger.debug('checkBinaryExists - onFinish');
             File.chmod(that.constants.BIN_DIR + binaryName, "0744"); //Set permissions rwx r-- ---
             that.emit('core.daemon.downloading', 100);
             callback(true);
@@ -61,7 +74,7 @@ class Core extends EventEmitter {
         let binaryFile = this.constants.BIN_DIR + binaryName;
         let checksum;
 
-        console.log('Checking binaries...');
+        that.logger.debug('Checking binaries...');
         File.download(this.constants.CHECKSUMS_URL, checksumFile, null, function (error, file) {
             let content = null;
             if (error) {
@@ -86,7 +99,7 @@ class Core extends EventEmitter {
 
             let downloadDaemon = function () {
                 File.download(that.constants.DAEMON_URL + binPlatform, binaryFile, function (progress) {
-                    console.log('Downloading daemon', progress + '%');
+                    that.logger.info('Downloading daemon', progress + '%');
                     that.emit('core.daemon.downloading', progress);
                 }, function () {
                     onFinish();
@@ -94,18 +107,18 @@ class Core extends EventEmitter {
             };
 
             if (checksum) {
-                console.log('Checksum found!');
+                that.logger.info('Checksum found!');
 
                 if (File.exist(binaryFile)) {
                     let binary = File.read(binaryFile, 'hex');
                     binary = Buffer.from(binary, 'hex');
                     let checksumBin = Utils.makeHash(binary);
-                    console.log('Comparing checksums', checksumBin, checksum);
+                    that.logger.debug('Comparing checksums', checksumBin, checksum);
                     if (checksum && checksum === checksumBin) {
-                        console.log('Checksums match');
+                        that.logger.debug('Checksums match');
                         onFinish();
                     } else {
-                        console.error('Checksums not match');
+                        that.logger.error('Checksums not match');
 
                         downloadDaemon()
                     }
@@ -113,7 +126,7 @@ class Core extends EventEmitter {
                     downloadDaemon();
                 }
             } else {
-                console.error('Checksum not found!!', content);
+                that.logger.error('Checksum not found!!', content);
                 if (!File.exist(binaryFile)) {
                     downloadDaemon();
                 } else {
@@ -130,7 +143,7 @@ class Core extends EventEmitter {
 
         let callCallback = function () {
             inits--;
-            console.log('Inits to perform:', inits);
+            that.logger.info('Inits to perform:', inits);
             if (inits === 0) {
                 if (callback) {
                     callback();
@@ -143,9 +156,9 @@ class Core extends EventEmitter {
 
         OS.run(daemon, ['-usehd', '-datadir=' + folder], function (executed, error) {
             if (executed) {
-                console.log('Starting daemon', daemon);
+                that.logger.debug('Starting daemon', daemon);
             } else {
-                console.error('Starting daemon failed', daemon, error);
+                that.logger.error('Starting daemon failed', daemon, error);
             }
 
             callCallback();
@@ -157,7 +170,7 @@ class Core extends EventEmitter {
             //that.dbrunner.start(that.constants.DATABASE_FILE, that.constants.DATABASE_CREATION_FILE);
             that.dbrunner = new IndexDB(that.constants.DATABASE_FILE, that.constants.DATABASE_CREATION_FILE);
             that.dbrunner.migrate(that.constants.DBMIGRATIONS_DIR, function (err) {
-                console.log('Database initialized', err);
+                that.logger.debug('Database initialized', err);
                 callCallback();
             });
         };
@@ -176,7 +189,7 @@ class Core extends EventEmitter {
             let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
             that.ipfsrunner.connect(swarm, function (err) {
                 if (err) {
-                    console.error(err);
+                    that.logger.error(err);
                 } else {
                     callCallback();
                 }
@@ -184,11 +197,11 @@ class Core extends EventEmitter {
         })*/
 
         this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
-            console.log('IPFS ready!');
+            that.logger.debug('IPFS ready!');
             let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
             that.ipfsrunner.send('connect', swarm, function (err) {
                 if (err) {
-                    console.error(err);
+                    that.logger.error(err);
                 } else {
                     callCallback();
                 }
@@ -202,17 +215,17 @@ class Core extends EventEmitter {
      * @param callback
      */
     start(callback) {
+        let that = this;
         this.emit('core.start');
         if (!this.isInitializing) {
             this.isInitializing = true;
             this.emit('core.loading');
-            let that = this;
             this.__checkBinariesExists(function (exists) {
-                console.log('Binaries exists', exists);
+                that.logger.debug('Binaries exists', exists);
                 if (exists) {
                     that.__initClients(function () {
                         that.isInitializing = false;
-                        console.log('emiting onstart');
+                        that.logger.debug('emiting onstart');
                         that.emit('core.started');
                         if (callback) {
                             callback();
@@ -223,7 +236,7 @@ class Core extends EventEmitter {
                 }
             })
         } else {
-            console.log('Trantor is initializing!');
+            that.logger.debug('Trantor is initializing!');
         }
     }
 
@@ -241,13 +254,13 @@ class Core extends EventEmitter {
     }
 
     explore(startBlock = 0) {
+        let that = this;
         this.isExploring = true;
         let exploringBlock = false;
         let nextBlockHash = null;
         let blockInterval = null;
         let blockCount = null;
         let blockHeight = null;
-        let that = this;
 
         let broadcastProgress = function (currentHeight) {
             //that.log('broadcasting progress', currentHeight);
@@ -268,10 +281,10 @@ class Core extends EventEmitter {
                 if (err) {
                     //Block not found
 
-                    console.error(err);
+                    that.logger.error(err);
 
                     if (blockHeight >= blockCount) {
-                        console.log('Exploration finish');
+                        that.logger.debug('Exploration finish');
 
                         if (blockInterval) {
                             clearInterval(blockInterval);
@@ -281,7 +294,7 @@ class Core extends EventEmitter {
                         that.isExploring = false;
                         clearInterval(blockCountInterval);
                         that.dbrunner.updateLastExploredBlock(blockHeight, function (err, result) {
-                            //console.log(err, result);
+                            //that.logger.debug(err, result);
                         });
                         that.emit('core.explore.finish', blockCount, blockHeight);
                     }
@@ -302,7 +315,7 @@ class Core extends EventEmitter {
                             broadcastProgress(blockHeight);
 
                             that.dbrunner.updateLastExploredBlock(blockHeight, function (err, result) {
-                                //console.log(err, result);
+                                //that.logger.debug(err, result);
                             });
 
                             nextBlockHash = nextBlock;
@@ -312,7 +325,7 @@ class Core extends EventEmitter {
                         }
                     };
 
-                    //console.log('Processing', txIds.length, 'transactions');
+                    //that.logger.debug('Processing', txIds.length, 'transactions');
 
                     txIds.forEach(function (txHash) {
 
@@ -324,7 +337,7 @@ class Core extends EventEmitter {
                             } else {
                                 let tx = DecodedTransaction.fromHex(rawTx, that.constants.NETWORK);
 
-                                //console.log('Processing transaction with', tx.outputs.length, 'outputs');
+                                //that.logger.debug('Processing transaction with', tx.outputs.length, 'outputs');
                                 if (tx.containsData()) {
 
                                     let broadcastData = function (data) {
@@ -365,7 +378,7 @@ class Core extends EventEmitter {
                                             broadcastData(data);
                                         }
                                     } catch (e) {
-                                        console.error(e);
+                                        that.logger.error(e);
                                     }
 
                                 }
@@ -384,17 +397,17 @@ class Core extends EventEmitter {
 
         let startExploration = function (blockHeight) {
             startBlock = blockHeight < that.constants.START_BLOCK ? that.constants.START_BLOCK : blockHeight;
-            console.log('Start exploration at block', startBlock);
+            that.logger.info('Start exploration at block', startBlock);
 
             that.rpcWallet.getBlockCount(function (err, result) {
                 if (!err) {
-                    console.log('Total blocks', result);
+                    that.logger.info('Total blocks', result);
                     that.emit('core.explore.start', startBlock);
                     blockCount = parseInt(result);
 
                     that.rpcWallet.getBlockHash(startBlock, function (err, blockHash) {
                         if (!err) {
-                            console.log('BlockHash', blockHash);
+                            that.logger.debug('BlockHash', blockHash);
 
                             nextBlockHash = blockHash;
 
@@ -410,7 +423,7 @@ class Core extends EventEmitter {
                         }
                     })
                 } else {
-                    console.error(err);
+                    that.logger.error(err);
                     that.isExploring = false;
                 }
             });
@@ -419,7 +432,7 @@ class Core extends EventEmitter {
         if (!startBlock) {
             this.dbrunner.getLastExploredBlock(function (err, result) {
                 if (err) {
-                    console.log(err);
+                    that.logger.error(err);
                 } else if (result.length > 0) {
                     result = result[0];
                     startExploration(result.lastExploredBlock+1);
@@ -603,9 +616,9 @@ class Core extends EventEmitter {
      * @param callback
      */
     createDataTransaction(data, destinyAddress, amount, callback) {
+        let that = this;
         this.log(data);
         amount = amount ? amount : this.txContentAmount;
-        let that = this;
         let onBuild = function (txBuilder, creaBuilder) {
             if (callback) {
                 callback(null, creaBuilder, txBuilder.inputs, txBuilder);
@@ -614,7 +627,7 @@ class Core extends EventEmitter {
 
         this.getSpendables(0, function (err, spendables) {
             if (err) {
-                console.error(err);
+                that.logger.error(err);
             } else if (spendables.length > 0) {
                 that.buildDataOutput(data, function (opReturnData) {
                     let dataSize = opReturnData.length;

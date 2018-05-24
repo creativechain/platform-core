@@ -9,13 +9,11 @@ class Runner extends EventEmitter {
      *
      * @param {string} script
      * @param {string} prefix
-     * @param {string} logFile
      */
-    constructor(script, prefix, logFile) {
+    constructor(script, prefix) {
         super();
         this.script = script;
         this.prefix = prefix;
-        this.logFile = logFile;
     }
 
     /**
@@ -58,10 +56,6 @@ class Runner extends EventEmitter {
 
         if (callback) {
             this.on(this.prefix + '.' + id, callback)
-        }
-
-        if (method === 'start' && this.logFile) {
-            params.push(this.logFile);
         }
 
         this.fork.send({id: id, method: method, arguments: params});

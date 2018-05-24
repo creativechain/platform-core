@@ -222,6 +222,9 @@ class CoreConfiguration extends Configuration {
         File.mkpath(constants.BIN_DIR);
         File.mkpath(constants.WALLET_DIR);
         File.mkpath(constants.DATA_DIR);
+
+        this.logfile = this.constants.LOG_DIR + 'core.log';
+
     }
 }
 
