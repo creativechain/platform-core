@@ -101,7 +101,9 @@ class Core extends EventEmitter {
                     that.logger.info('Downloading daemon', progress + '%');
                     that.emit('core.daemon.downloading', progress);
                 }, function () {
-                    onFinish();
+                    setTimeout(function () {
+                        onFinish();
+                    }, 1000);
                 })
             };
 
