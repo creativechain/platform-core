@@ -287,7 +287,12 @@ class Core extends EventEmitter {
     }
 
     stopIpfs() {
-        this.ipfsrunner.stop();
+        try {
+            this.ipfsrunner.stop();
+        } catch (err) {
+            this.logger.error(err);
+        }
+
     }
 
     stop(callback) {
