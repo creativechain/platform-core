@@ -205,8 +205,36 @@ class Core extends EventEmitter {
         }
     }
 
+    restartIpfs() {
+        try {
+            this.stopIpfs();
+        } catch (err) {
+
+        }
+
+        try {
+            this.startIpfs();
+        } catch (err) {
+            this.logger.error(err)
+        }
+    }
+
     startIpfs(callback) {
         let that =this;
+
+        this.ipfsrunner.on('close', function (code, signal) {
+            if (signal.toLowerCase() !== 'SIGTERM') {
+                that.logger.error('IPFS close event - Signal received:', signal, 'Code:', code);
+                that.restartIpfs();
+            }
+        });
+
+        this.ipfsrunner.on('exit', function (code, signal) {
+            if (signal.toLowerCase() !== 'SIGTERM') {
+                that.logger.error('IPFS exit event - Signal received:', signal, 'Code:', code);
+                that.restartIpfs();
+            }
+        });
 
         this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
             that.logger.debug('IPFS ready!');
