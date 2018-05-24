@@ -43,7 +43,7 @@ class Runner extends EventEmitter {
             that.emit('exit', code, signal);
         });
 
-        this.fork('disconnect', function () {
+        this.fork.on('disconnect', function () {
             that.emit('disconnect');
             that.fork.kill('SIGTERM');
         });
