@@ -47,7 +47,7 @@ class Core extends EventEmitter {
         //Setup logger
         log4js.configure({
             appenders: {
-                console: { type: 'console' },
+                console: { type: 'console', layout: {type: 'basic'} },
                 everything: { type: 'file', filename: this.configuration.logfile, maxLogSize: 10485760, backups: 3, compress: true }
             },
             categories: { default: { appenders: [ 'console', 'everything' ], level: 'all' } }

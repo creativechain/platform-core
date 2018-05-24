@@ -28,7 +28,7 @@ class IpfsClient extends IPFS {
         //Setup logger
         log4js.configure({
             appenders: {
-                console: { type: 'console' },
+                console: { type: 'console', layout: {type: 'basic'} },
                 everything: { type: 'file', filename: config.logFile, maxLogSize: 10485760, backups: 3, compress: true }
             },
             categories: { default: { appenders: [ 'console', 'everything' ], level: 'all' } }
