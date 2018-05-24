@@ -151,6 +151,19 @@ class Core extends EventEmitter {
             }
         };
 
+        //Start Creativecoin Core
+        this.startDaemon(callCallback);
+
+        //Initialize Database
+        this.startDb(callCallback);
+
+        //Start IPFS
+        this.startIpfs(callCallback);
+
+    }
+
+    startDaemon(callback) {
+        let that = this;
         let folder = this.constants.BIN_DIR.replace(/(\r\n|\n|\r)/gm,"");
         let daemon = folder + this.constants.BINARY_NAME.replace(/(\r\n|\n|\r)/gm,"");
 
@@ -161,9 +174,14 @@ class Core extends EventEmitter {
                 that.logger.error('Starting daemon failed', daemon, error);
             }
 
-            callCallback();
+            if (callback) {
+                callback(error);
+            }
         });
+    }
 
+    startDb(callback) {
+        let that = this;
         File.mkpath(this.constants.DATABASE_FILE, true);
 
         let startDb = function () {
@@ -171,7 +189,9 @@ class Core extends EventEmitter {
             that.dbrunner = new IndexDB(that.constants.DATABASE_FILE, that.constants.DATABASE_CREATION_FILE);
             that.dbrunner.migrate(that.constants.DBMIGRATIONS_DIR, function (err) {
                 that.logger.debug('Database initialized', err);
-                callCallback();
+                if (callback) {
+                    callback();
+                }
             });
         };
 
@@ -183,18 +203,10 @@ class Core extends EventEmitter {
         } else {
             startDb();
         }
+    }
 
-/*        this.ipfsrunner = new IpfsClient(this.configuration.ipfsConfig);
-        this.ipfsrunner.on('ready', function () {
-            let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
-            that.ipfsrunner.connect(swarm, function (err) {
-                if (err) {
-                    that.logger.error(err);
-                } else {
-                    callCallback();
-                }
-            })
-        })*/
+    startIpfs(callback) {
+        let that =this;
 
         this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
             that.logger.debug('IPFS ready!');
@@ -202,12 +214,11 @@ class Core extends EventEmitter {
             that.ipfsrunner.send('connect', swarm, function (err) {
                 if (err) {
                     that.logger.error(err);
-                } else {
-                    callCallback();
+                } else if (callback) {
+                    callback();
                 }
             });
         });
-
     }
 
     /**
@@ -240,17 +251,58 @@ class Core extends EventEmitter {
         }
     }
 
+    stopDaemon() {
+        this.rpcWallet.stop();
+    }
+
+    stopDatabase() {
+        this.dbrunner.close();
+    }
+
+    stopIpfs() {
+        this.ipfsrunner.stop();
+    }
+
     stop(callback) {
         this.emit('core.stop');
-        this.dbrunner.close();
-        this.ipfsrunner.stop();
-        this.rpcWallet.stop();
+        this.stopDaemon();
+        this.stopDatabase();
+        this.stopIpfs();
 
         if (callback) {
             setTimeout(function () {
                 callback();
             }, 7000);
         }
+    }
+
+    /**
+     *
+     * @param {string} walletsrc
+     * @param callback
+     */
+    restoreWallet(walletsrc, callback) {
+        let that = this;
+        that.logger.debug('Resotring wallet from', walletsrc);
+        if (File.exist(walletsrc)) {
+            this.stopDaemon();
+
+            setTimeout(function () {
+                File.cp(walletsrc, that.configuration.constants.WALLET_FILE);
+                that.logger.debug('Wallet restored!');
+                that.startDaemon(callback);
+            }, 7000);
+        }
+    }
+
+    /**
+     *
+     * @param {string} walletdest
+     * @param callback
+     */
+    backupWallet(walletdest, callback) {
+        this.logger.debug('Creating backup wallet on', walletdest);
+        this.rpcWallet.backupWallet(walletdest, callback);
     }
 
     explore(startBlock = 0) {

@@ -35,6 +35,19 @@ class Runner extends EventEmitter {
             that.emit('close', code, signal);
         });
 
+        this.fork.on('error', function (err) {
+            that.emit('error', err)
+        });
+
+        this.fork.on('exit', function (code, signal) {
+            that.emit('exit', code, signal);
+        });
+
+        this.fork('disconnect', function () {
+            that.emit('disconnect');
+            that.fork.kill('SIGTERM');
+        });
+
         this.send('start', ...args);
     }
 
@@ -61,8 +74,16 @@ class Runner extends EventEmitter {
         this.fork.send({id: id, method: method, arguments: params});
     }
 
+    /**
+     *
+     * @return {boolean}
+     */
+    isAlive() {
+        return !this.fork.killed && !this.fork.connected;
+    }
+
     stop() {
-        this.fork.kill('SIGTERM');
+        this.fork.disconnect();
     }
 }
 
