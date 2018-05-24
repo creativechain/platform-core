@@ -6,7 +6,7 @@ let ipfsClient = null;
 function bindMethod(data) {
     if (data.method === 'start') {
         ipfsClient = new IpfsClient(data.arguments[0]);
-
+        ipfsClient.logger.info('IPFS Created!');
         let response = {
             event: 'ipfs.' + data.id,
             response: ['ready']
