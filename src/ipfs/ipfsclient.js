@@ -35,7 +35,7 @@ class IpfsClient extends IPFS {
         });
 
         this.logger = log4js.getLogger('ipfsclient');
-        this.logger.level = log4js.Level.ALL;
+        this.logger.level = 'all';
 
 
         //Delete repo.lock file for previous instance

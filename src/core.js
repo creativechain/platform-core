@@ -3,7 +3,6 @@ let EventEmitter = require('events');
 let Runner = require('./runner');
 let RPCWallet = require('./rpcwallet');
 let Error = require('./error');
-let IpfsClient = require('./ipfs/ipfsclient');
 let IndexDB = require('./database/db');
 let {OS, File, Utils} = require('./utils');
 let {DecodedTransaction, Spendable, TransactionBuilder} = require('./txwrapper');
@@ -55,7 +54,7 @@ class Core extends EventEmitter {
         });
 
         this.logger = log4js.getLogger('core');
-        this.logger.level = log4js.Level.ALL;
+        this.logger.level = 'all';
     }
 
     __checkBinariesExists(callback) {
