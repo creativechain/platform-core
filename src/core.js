@@ -675,7 +675,7 @@ class Core extends EventEmitter {
         let privKeys = [];
 
         let signTx = function () {
-            that.log(privKeys);
+            that.logger.debug(privKeys);
 
             for (let x = 0; x < privKeys.length; x++) {
                 let pk = privKeys[x];
@@ -684,7 +684,7 @@ class Core extends EventEmitter {
             }
 
             let txHex = txBuilder.build().toHex();
-            that.log(txHex);
+            that.logger.debug(txHex);
             if (callback) {
                 callback(null, txHex);
             }
@@ -1046,7 +1046,7 @@ class Core extends EventEmitter {
     log(...args) {
         if (this.configuration.debug) {
             args.unshift('core.log');
-            this.emit.apply(this, ...args);
+            this.emit.apply(this, args);
         }
     }
 
