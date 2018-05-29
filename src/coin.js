@@ -1,3 +1,58 @@
+class CoinUri {
+
+    /**
+     *
+     * @param {string} address
+     * @param {string} amount
+     * @param {string} label
+     * @param {string} message
+     */
+    constructor(address, amount, label, message) {
+        this.address = address;
+        this.amount = amount;
+        this.label = label;
+        this.message = message;
+    }
+
+    /**
+     * @return {string}
+     */
+    toString() {
+        let uri = 'creativecoin:';
+        let hasAmount = this.amount && this.amount > 0;
+        let hasLabel = this.label && this.label.length > 0;
+        let hasMessage = this.message && this.message.length > 0;
+        let addedFirst = false;
+
+        if (this.address) {
+            uri += this.address;
+        }
+
+        if (hasAmount || hasLabel || hasMessage) {
+            uri += '?';
+        }
+
+        if (hasAmount) {
+            uri += addedFirst ? '&' : '';
+            uri += 'amount=' + this.amount;
+            addedFirst = true;
+        }
+
+        if (hasLabel) {
+            uri += addedFirst ? '&' : '';
+            uri += 'label=' + encodeURIComponent(this.label);
+            addedFirst = true;
+        }
+
+        if (hasMessage) {
+            uri += addedFirst ? '&' : '';
+            uri += 'message=' + encodeURIComponent(this.message);
+        }
+
+        return uri;
+    }
+}
+
 class Currency {
     constructor(name, code, symbol, scale) {
         this.name = name;
@@ -401,6 +456,6 @@ class ZlotiCoin extends Coin {
 }
 
 if (module) {
-    module.exports = {Currency, FiatCurrency, CryptoCurrency, UnknownCurrency, Btc, Pln, Usd, Mxn, Eur, MonetaryFormat, Coin,
+    module.exports = {CoinUri, Currency, FiatCurrency, CryptoCurrency, UnknownCurrency, Btc, Pln, Usd, Mxn, Eur, MonetaryFormat, Coin,
         CryptoCoin, BitCoin, CreativeCoin, EurCoin, DollarCoin, PesoCoin, ZlotiCoin}
 }
