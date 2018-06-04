@@ -107,7 +107,7 @@ class IpfsClient extends IPFS {
                     that.logger.info('sharing', options.url);
                     request(options, function (error, response, body) {
                         if (error) {
-                            console.error(error);
+                            that.logger.error(error);
                         } else {
                             that.logger.info('IPFS Shared on', url);
                         }

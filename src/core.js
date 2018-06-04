@@ -253,10 +253,12 @@ class Core extends EventEmitter {
             that.ipfsrunner.send('connect', swarm, function (err) {
                 if (err) {
                     that.logger.error(err);
-                } else if (callback) {
-                    callback();
                 }
             });
+
+            if (callback) {
+                callback();
+            }
         });
     }
 
