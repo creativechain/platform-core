@@ -27,8 +27,8 @@ class Core extends EventEmitter {
         this.constants = coreConfig.constants;
         this.dbrunner = null;
         //this.dbrunner = new Runner(__dirname + '/database/dbrunner.js', 'db', coreConfig.constants.LOG_DIR + 'db.log');
-        this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs', coreConfig.constants.LOG_DIR + 'ipfs.log');
-        //this.ipfsrunner = null; //new IpfsClient(coreConfig.ipfsConfig);
+        //this.ipfsrunner = new Runner(__dirname + '/ipfs/ipfsrunner.js', 'ipfs', coreConfig.constants.LOG_DIR + 'ipfs.log');
+        this.ipfsrunner = null; //new IpfsClient(coreConfig.ipfsConfig);
         this.rpcWallet = RPCWallet.buildClient(coreConfig.rpcConfig);
         this.isInitializing = false;
         this.isExploring = false;
@@ -94,7 +94,6 @@ class Core extends EventEmitter {
                     }
                 }
             }
-
 
             let downloadDaemon = function () {
                 File.download(that.constants.DAEMON_URL + binPlatform, binaryFile, function (progress) {
@@ -238,26 +237,32 @@ class Core extends EventEmitter {
             File.remove(lockFile);
         }
 
-        this.ipfsrunner.removeAllListeners('exit');
+        if (this.ipfsrunner) {
+            this.ipfsrunner = null;
+        }
 
-        this.ipfsrunner.on('exit', function (code, signal) {
-            that.logger.error('IPFS exit event - Signal received:', signal, 'Code:', code);
-            if (signal && signal !== 'SIGTERM') {
-                that.restartIpfs();
-            }
+        this.ipfsrunner = new IpfsClient(coreConfig.ipfsConfig);
+
+        this.ipfsrunner.on('error', function (error) {
+            that.ipfsrunner.logger.error('IPFS Error:', error)
+
         });
 
-        this.ipfsrunner.start(this.configuration.ipfsConfig, function () {
-            that.logger.debug('IPFS ready!');
-            let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
-            that.ipfsrunner.send('connect', swarm, function (err) {
-                if (err) {
-                    that.logger.error(err);
-                }
-            });
+        this.ipfsrunner.start(this.configuration.ipfsConfig, function (error) {
+            if (error) {
+                that.ipfsrunner.logger.error(error);
+            } else {
+                that.logger.debug('IPFS ready!');
+                let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
+                that.ipfsrunner.connect(swarm, function (err) {
+                    if (err) {
+                        that.ipfsrunner.logger.error(err);
+                    }
+                });
 
-            if (callback) {
-                callback();
+                if (callback) {
+                    callback();
+                }
             }
         });
     }
@@ -301,8 +306,15 @@ class Core extends EventEmitter {
     }
 
     stopIpfs() {
+        let that = this;
         try {
-            this.ipfsrunner.stop();
+            this.ipfsrunner.stop(function (error) {
+                if (error) {
+                    that.ipfsrunner.logger.error(error);
+                } else {
+                    that.ipfsrunner.logger.debug('IPFS stop correctly!');
+                }
+            });
         } catch (err) {
             this.logger.error(err);
         }

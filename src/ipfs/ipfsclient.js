@@ -18,9 +18,12 @@ class IpfsClient extends IPFS {
         if (config.ipfsDir) {
             super({
                 repo: config.ipfsDir,
+                start: false,
             })
         } else {
-            super();
+            super({
+                start: false
+            });
         }
 
         this.configuration = config;
