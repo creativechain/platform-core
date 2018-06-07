@@ -242,7 +242,7 @@ class Core extends EventEmitter {
             this.ipfsrunner = null;
         }
 
-        this.ipfsrunner = new IpfsClient(coreConfig.ipfsConfig);
+        this.ipfsrunner = new IpfsClient(this.configuration.ipfsConfig);
 
         this.ipfsrunner.on('error', function (error) {
             that.ipfsrunner.logger.error('IPFS Error:', error)
