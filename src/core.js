@@ -244,28 +244,24 @@ class Core extends EventEmitter {
 
         this.ipfsrunner = new IpfsClient(this.configuration.ipfsConfig);
 
-        this.ipfsrunner.on('error', function (error) {
-            that.ipfsrunner.logger.error('IPFS Error:', error)
-
-        });
-
-        this.ipfsrunner.start(function (error) {
-            if (error) {
-                that.ipfsrunner.logger.error(error);
-            } else {
-                that.logger.debug('IPFS ready!');
-                let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
-                that.ipfsrunner.connect(swarm, function (err) {
-                    if (err) {
-                        that.ipfsrunner.logger.error(err);
-                    }
-                });
-
-                if (callback) {
-                    callback();
+        this.ipfsrunner.on('ready', function () {
+            that.logger.debug('IPFS ready!');
+            let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
+            that.ipfsrunner.connect(swarm, function (err) {
+                if (err) {
+                    that.ipfsrunner.logger.error(err);
                 }
+            });
+
+            if (callback) {
+                callback();
             }
         });
+
+        this.ipfsrunner.on('error', function (error) {
+            that.ipfsrunner.logger.error('IPFS Error:', error)
+        });
+
     }
 
     /**
