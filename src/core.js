@@ -1,6 +1,7 @@
 let {CoreConfiguration} = require('./config');
 let EventEmitter = require('events');
 let Runner = require('./runner');
+let IpfsClient = require('./ipfs/ipfsclient');
 let RPCWallet = require('./rpcwallet');
 let Error = require('./error');
 let IndexDB = require('./database/db');
