@@ -249,7 +249,7 @@ class Core extends EventEmitter {
 
         });
 
-        this.ipfsrunner.start(this.configuration.ipfsConfig, function (error) {
+        this.ipfsrunner.start(function (error) {
             if (error) {
                 that.ipfsrunner.logger.error(error);
             } else {
