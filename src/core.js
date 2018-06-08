@@ -1064,7 +1064,7 @@ class Core extends EventEmitter {
     error(...args) {
         if (this.configuration.debug) {
             args.unshift('core.error');
-            this.emit.apply(this, ...args);
+            this.emit.apply(this, args);
         }
 
     }
