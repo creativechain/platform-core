@@ -599,17 +599,7 @@ class Core extends EventEmitter {
             let mByte = that.constants.DEBUG ? Constants.MAGIC_BYTE_TESTNET : Constants.MAGIC_BYTE;
             let outData = TrantorUtils.serializeNumber(mByte) + TrantorUtils.serializeNumber(data.mustBeCompressed) + dataHex.toString('hex');
 
-            outData = Buffer.from(outData, 'hex');
-            if (!error) {
-                that.log('Final data:', outData.length, outData.toString('hex'));
-                let ret = creativecoin.script.compile([
-                    creativecoin.opcodes.OP_RETURN,
-                    outData
-                ]);
-                callback(ret);
-            } else {
-                that.emit('core.build.error', error);
-            }
+            callback(outData);
         };
 
         if (data.mustBeCompressed) {
@@ -677,12 +667,14 @@ class Core extends EventEmitter {
 
     /**
      *
-     * @param txBuilder
+     * @param {{ hex: String, fee: Number, changepos: Number}} builtTx
      * @param {Array} spendables
      * @param callback
      */
-    signTransaction(txBuilder, spendables, callback) {
+    signTransaction(builtTx, spendables, callback) {
         let that = this;
+
+
         let privKeys = [];
 
         let signTx = function () {
@@ -691,10 +683,10 @@ class Core extends EventEmitter {
             for (let x = 0; x < privKeys.length; x++) {
                 let pk = privKeys[x];
                 privKeys[x] = creativecoin.ECPair.fromWIF(pk, that.constants.NETWORK);
-                txBuilder.sign(x, privKeys[x]);
+                builtTx.sign(x, privKeys[x]);
             }
 
-            let txHex = txBuilder.build().toHex();
+            let txHex = builtTx.build().toHex();
             that.logger.debug(txHex);
             if (callback) {
                 callback(null, txHex);
@@ -720,6 +712,46 @@ class Core extends EventEmitter {
 
     /**
      *
+     * @param {*} outputs
+     * @param {Number} feeRate
+     * @param {boolean} subtractFee
+     * @param callback
+     */
+    createTransaction(outputs, feeRate, subtractFee, callback) {
+        let that = this;
+
+        this.rpcWallet.createRawTransaction([], outputs, function (err, rawHex) {
+            if (err) {
+                that.logger.error(err);
+            } else {
+                let options = {};
+
+                if (feeRate) {
+                    options.feeRate = feeRate;
+
+                }
+
+                if (subtractFee) {
+                    options.subtracFeeFromOutputs = [];
+                    let totalOuts = Object.keys(outputs).length;
+                    for (let x = 0; x < totalOuts; x++) {
+                        options.subtracFeeFromOutputs.push(x);
+                    }
+                }
+
+                that.rpcWallet.fundRawTransaction(rawHex, options, function (err, result) {
+                    if (err) {
+                        that.logger.error(err);
+                    } else if (callback) {
+                        callback(result);
+                    }
+                })
+            }
+        })
+    }
+
+    /**
+     *
      * @param {ContentData} data
      * @param {string} destinyAddress
      * @param {number} amount
@@ -729,56 +761,21 @@ class Core extends EventEmitter {
         let that = this;
         this.log(data);
         amount = amount ? amount : this.txContentAmount;
-        let onBuild = function (txBuilder, creaBuilder) {
-            if (callback) {
-                callback(null, creaBuilder, txBuilder.inputs, txBuilder);
-            }
-        };
 
-        this.getSpendables(0, function (err, spendables) {
-            if (err) {
-                that.logger.error(err);
-            } else if (spendables.length > 0) {
-                that.buildDataOutput(data, function (opReturnData) {
-                    let dataSize = opReturnData.length;
+        this.buildDataOutput(data, function (outdata) {
+            let outputs = {
+                data: outdata
+            };
 
-                    let txBuilder = new TransactionBuilder(that.constants.NETWORK, that.txFeeKb, dataSize);
+            outputs[destinyAddress] = amount ? amount : that.txContentAmount;
 
-                    that.rpcWallet.getRawChangeAddress(function (err, result) {
-                        if (err) {
-                            that.error(err);
-                        } else {
-                            txBuilder.changeAddress = result;
-                            txBuilder.addOutput(destinyAddress, amount);
-
-                            txBuilder.completeTx(spendables);
-
-                            if (txBuilder.complete) {
-                                let creaBuilder = txBuilder.txb;
-                                creaBuilder.addOutput(opReturnData, 0);
-
-                                let fee = txBuilder.txFee;
-                                that.log('Fee: ', Coin.parseCash(txBuilder.txFee, 'CREA').toString() + '/B');
-                                creaBuilder.txFee = fee;
-                                onBuild(txBuilder, creaBuilder);
-                            } else {
-                                that.error('Tx is incomplete', txBuilder, spendables);
-                                if (callback) {
-                                    callback(Error.INSUFFICIENT_AMOUNT);
-                                }
-                            }
-                        }
-                    });
-
-                });
-            } else {
-                that.error('Not found spendables for this data', err, spendables);
+            let feeRate = new CreativeCoin(that.txFeeKb).getScaleValue();
+            that.createTransaction(outputs, feeRate, false, function (builtTx) {
                 if (callback) {
-                    callback(Error.NOT_SPENDABLES);
+                    callback(null, builtTx);
                 }
-            }
-
-        })
+            })
+        });
     }
 
     /**
@@ -798,21 +795,11 @@ class Core extends EventEmitter {
         let avatarCID = avatar ? avatar.CID : '';
         let userReg = new Author(userAddress, nick, email, web, description, avatarCID, tags);
         let buffUser = userReg.serialize();
-        that.createDataTransaction(userReg, userAddress, null, function (error, txBuilder, spendables) {
-
+        that.createDataTransaction(userReg, userAddress, null, function (error, txBuilt) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(txBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        let tx = creativecoin.Transaction.fromBuffer(txBuffer);
-                        that.emit('core.register.build', txBuilder, txBuffer, userReg, avatar);
-                    }
-
-                });
+                that.emit('core.register.build', txBuilt, userReg, avatar);
             }
 
         });
@@ -844,20 +831,11 @@ class Core extends EventEmitter {
 
         let postBuffer = mediaPost.serialize();
 
-        that.createDataTransaction(mediaPost, publishAddress, null, function (error, txBuilder, spendables) {
+        that.createDataTransaction(mediaPost, publishAddress, null, function (error, txBuilder) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(txBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        let tx = creativecoin.Transaction.fromBuffer(txBuffer);
-                        that.emit('core.publication.build', txBuffer, mediaPost, txBuilder);
-                    }
-
-                });
+                that.emit('core.publication.build', txBuilder, mediaPost);
             }
 
         });
@@ -873,18 +851,11 @@ class Core extends EventEmitter {
         let that = this;
         let commentData = new Comment(userAddress, contentAddress, comment);
         let commentBuffer = commentData.serialize();
-        this.createDataTransaction(commentData, userAddress, null, function (error, txBuilder, spendables) {
+        this.createDataTransaction(commentData, userAddress, null, function (error, txBuilder) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(txBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        that.emit('core.comment.build', txBuffer, commentData);
-                    }
-                });
+                that.emit('core.comment.build', txBuilder, commentData);
             }
         })
     }
@@ -899,18 +870,11 @@ class Core extends EventEmitter {
         let that = this;
         let likeData = new Like(userAddress, contentAddress);
         let likeBuffer = likeData.serialize();
-        this.createDataTransaction(likeData, contentAddress, likeAmount, function (error, txBuilder, spendables) {
+        this.createDataTransaction(likeData, contentAddress, likeAmount, function (error, txBuilder) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(txBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        that.emit('core.like.build', txBuffer, likeData);
-                    }
-                });
+                that.emit('core.like.build', txBuilder, likeData);
             }
         })
     }
@@ -924,18 +888,11 @@ class Core extends EventEmitter {
             } else {
                 result = result[0];
                 let paymentData = new Payment(userAddress, contentAddress, result.price);
-                that.createDataTransaction(paymentData, contentAddress, result.price, function (error, creaBuilder, spendables, txBuilder) {
+                that.createDataTransaction(paymentData, contentAddress, result.price, function (error, builtTx) {
                     if (error) {
                         that.error(error);
                     } else {
-                        that.signTransaction(creaBuilder, spendables, function (err, rawTx) {
-                            if (err) {
-                                that.error(err);
-                            } else {
-                                let txBuffer = Buffer.from(rawTx, 'hex');
-                                that.emit('core.payment.build', creaBuilder, txBuffer, paymentData, txBuilder);
-                            }
-                        });
+                        that.emit('core.payment.build', builtTx, paymentData);
                     }
                 })
 
@@ -946,18 +903,11 @@ class Core extends EventEmitter {
     follow(userAddress, followedAddress) {
         let that = this;
         let followData = new Follow(userAddress, followedAddress);
-        this.createDataTransaction(followData, userAddress, null, function (error, creaBuilder, spendables, txBuilder) {
+        this.createDataTransaction(followData, userAddress, null, function (error, txBuilt) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(creaBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        that.emit('core.follow.build', creaBuilder, txBuffer, followData, txBuilder);
-                    }
-                })
+                that.emit('core.follow.build', txBuilt, followData);
             }
         })
     }
@@ -965,18 +915,11 @@ class Core extends EventEmitter {
     unfollow(userAddress, followedAddress) {
         let that = this;
         let followData = new Unfollow(userAddress, followedAddress);
-        this.createDataTransaction(followData, userAddress, null, function (error, creaBuilder, spendables, txBuilder) {
+        this.createDataTransaction(followData, userAddress, null, function (error, txBuilt) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(creaBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        that.emit('core.unfollow.build', creaBuilder, txBuffer, followData, txBuilder);
-                    }
-                })
+                that.emit('core.unfollow.build', txBuilt, followData);
             }
         })
     }
@@ -984,18 +927,11 @@ class Core extends EventEmitter {
     block(userAddress, followedAddress) {
         let that = this;
         let followData = new BlockContent(userAddress, followedAddress);
-        this.createDataTransaction(followData, userAddress, null, function (error, creaBuilder, spendables, txBuilder) {
+        this.createDataTransaction(followData, userAddress, null, function (error, creaBuilder) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(creaBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        that.emit('core.block.build', creaBuilder, txBuffer, followData, txBuilder);
-                    }
-                })
+                that.emit('core.block.build', creaBuilder, followData);
             }
         })
     }
@@ -1003,18 +939,11 @@ class Core extends EventEmitter {
     unblock(userAddress, followedAddress) {
         let that = this;
         let followData = new UnblockContent(userAddress, followedAddress);
-        this.createDataTransaction(followData, userAddress, null, function (error, creaBuilder, spendables, txBuilder) {
+        this.createDataTransaction(followData, userAddress, null, function (error, creaBuilder) {
             if (error) {
                 that.error(error);
             } else {
-                that.signTransaction(creaBuilder, spendables, function (err, rawTx) {
-                    if (err) {
-                        that.error(err);
-                    } else {
-                        let txBuffer = Buffer.from(rawTx, 'hex');
-                        that.emit('core.unblock.build', creaBuilder, txBuffer, followData, txBuilder);
-                    }
-                })
+                that.emit('core.unblock.build', creaBuilder, followData);
             }
         })
     }

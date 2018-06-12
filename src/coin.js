@@ -198,6 +198,11 @@ Currency.BTC = new Btc();
 Currency.CREA = new Crea();
 
 class Coin {
+    /**
+     *
+     * @param {Currency} currency
+     * @param {Number} amountInCents
+     */
     constructor(currency, amountInCents) {
         this.amount = amountInCents;
         this.currency = currency;
@@ -388,6 +393,11 @@ class MonetaryFormat {
 }
 
 class CryptoCoin extends Coin {
+    /**
+     *
+     * @param {Currency} currency
+     * @param {Number} amountInCents
+     */
     constructor(currency, amountInCents) {
         super(currency, amountInCents);
     }

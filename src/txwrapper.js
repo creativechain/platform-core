@@ -286,6 +286,19 @@ class DecodedTransaction {
 
     /**
      *
+     * @return {number}
+     */
+    getTotalOut() {
+        let total = 0;
+        this.outputs.forEach(function (output) {
+            total += output.value;
+        });
+
+        return total;
+    }
+
+    /**
+     *
      * @return {boolean}
      */
     containsData() {
