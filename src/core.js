@@ -6,6 +6,7 @@ let RPCWallet = require('./rpcwallet');
 let Error = require('./error');
 let IndexDB = require('./database/db');
 let {OS, File, Utils} = require('./utils');
+let {Coin} = require('./coin');
 let {DecodedTransaction, Spendable, TransactionBuilder} = require('./txwrapper');
 let {Constants, TrantorUtils, ContentData, Author, Like, Follow, Unfollow, MediaData, Comment, Payment,
     BlockContent, UnblockContent} = require('trantor-js');
