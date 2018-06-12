@@ -773,7 +773,8 @@ class Core extends EventEmitter {
                 data: outdata
             };
 
-            outputs[destinyAddress] = amount ? amount : that.txContentAmount;
+
+            outputs[destinyAddress] = amount ? Coin.parseCash(amount, 'CREA').getScaleValue() : Coin.parseCash(that.txContentAmount, 'CREA').getScaleValue();
 
             let feeRate = new CreativeCoin(that.txFeeKb).getScaleValue();
             that.createTransaction(outputs, feeRate, false, callback);
