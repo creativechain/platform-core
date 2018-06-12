@@ -288,10 +288,13 @@ class DecodedTransaction {
      *
      * @return {number}
      */
-    getTotalOut() {
+    getTotalOut(changeIndex) {
         let total = 0;
-        this.outputs.forEach(function (output) {
-            total += output.value;
+
+        this.outputs.forEach(function (output, index) {
+            if (index !== changeIndex) {
+                total += output.value;
+            }
         });
 
         return total;
