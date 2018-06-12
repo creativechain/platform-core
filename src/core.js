@@ -723,6 +723,9 @@ class Core extends EventEmitter {
         this.rpcWallet.createRawTransaction([], outputs, function (err, rawHex) {
             if (err) {
                 that.logger.error(err);
+                if (callback) {
+                    callback(err);
+                }
             } else {
                 let options = {};
 
@@ -742,8 +745,11 @@ class Core extends EventEmitter {
                 that.rpcWallet.fundRawTransaction(rawHex, options, function (err, result) {
                     if (err) {
                         that.logger.error(err);
+                        if (callback) {
+                            callback(err);
+                        }
                     } else if (callback) {
-                        callback(result);
+                        callback(null, result);
                     }
                 })
             }
@@ -770,11 +776,7 @@ class Core extends EventEmitter {
             outputs[destinyAddress] = amount ? amount : that.txContentAmount;
 
             let feeRate = new CreativeCoin(that.txFeeKb).getScaleValue();
-            that.createTransaction(outputs, feeRate, false, function (builtTx) {
-                if (callback) {
-                    callback(null, builtTx);
-                }
-            })
+            that.createTransaction(outputs, feeRate, false, callback);
         });
     }
 
