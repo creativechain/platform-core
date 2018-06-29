@@ -624,7 +624,7 @@ IndexDB.prototype.getAllMedia = function(userAddress, page, callback) {
  * @param {number} page
  * @param callback
  */
-IndexDB.prototype.getDownloableMedia = function(userAddress, page, callback) {
+IndexDB.prototype.getDownloadableMedia = function(userAddress, page, callback) {
     if (!page) {
         page = 1;
     }
