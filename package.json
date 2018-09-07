@@ -25,7 +25,6 @@
   },
   "homepage": "https://github.com/creativechain/platform-core#readme",
   "dependencies": {
-    "EventEmitter": "^1.0.0",
     "altcoin-rpc": "^1.0.2",
     "better-sqlite3": "^4.1.0",
     "bitcoinjs-lib": "^3.3.2",
