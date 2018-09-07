@@ -246,13 +246,13 @@ class Core extends EventEmitter {
         this.ipfsrunner = new IpfsClient(this.configuration.ipfsConfig);
 
         this.ipfsrunner.on('ready', function () {
-/*            that.logger.debug('IPFS ready!');
+            that.logger.debug('IPFS ready!');
             let swarm = '/ip4/213.136.90.245/tcp/4003/ws/ipfs/QmaLx52PxcECmncZnU9nZ4ew9uCyL6ffgNptJ4AQHwkSjU';
             that.ipfsrunner.connect(swarm, function (err) {
                 if (err) {
                     that.ipfsrunner.logger.error(err);
                 }
-            });*/
+            });
 
             if (callback) {
                 callback();
