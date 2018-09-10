@@ -109,7 +109,7 @@ class IpfsClient extends IPFS {
                         if (error) {
                             that.logger.error(error);
                         } else {
-                            that.logger.info('IPFS Shared on', url);
+                            that.logger.info('IPFS Shared', ipfsData.hash, 'on', url);
                         }
                     });
                 });
